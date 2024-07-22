@@ -11,7 +11,7 @@ import Then
 
 class OnBoardingViewController: BaseViewController {
     let titleLabel = UILabel().then {
-        $0.text = "Picha"
+        $0.text = "Pictar"
         $0.font = .boldSystemFont(ofSize: 50)
         $0.textColor = .mainColor
     }
@@ -24,20 +24,28 @@ class OnBoardingViewController: BaseViewController {
     }
     let startButton = UIButton().then {
         $0.setTitle("시작하기", for: .normal)
+        $0.titleLabel?.font = .boldSystemFont(ofSize: 18)
         $0.setTitleColor(.white, for: .normal)
         $0.backgroundColor = .mainColor
         $0.layer.cornerRadius = 25
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        configureHierarcy()
+        configureHierarchy()
         configureLayout()
     }
-    override func configureHierarcy() {
+    override func configureHierarchy() {
         view.addSubview(titleLabel)
         view.addSubview(launchImage)
         view.addSubview(nameLabel)
         view.addSubview(startButton)
+        startButton.addTarget(self, action: #selector(startButtonPressed) , for: .touchUpInside)
+    }
+    @objc func startButtonPressed() {
+        let vc = ProfileViewController()
+        navigationController?.pushViewController(vc, animated: true)
+        UserDefaults.standard.set(nil, forKey: "nickname")
+        UserDefaults.standard.set(nil, forKey: "profile")
     }
     override func configureLayout() {
         titleLabel.snp.makeConstraints { make in
@@ -55,7 +63,7 @@ class OnBoardingViewController: BaseViewController {
         }
         startButton.snp.makeConstraints { make in
             make.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(40)
-            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(30)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
             make.height.equalTo(50)
         }
     }
