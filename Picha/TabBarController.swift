@@ -10,9 +10,9 @@ import UIKit
 class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        tabBar.tintColor = .mainColor
-        tabBar.unselectedItemTintColor = .greyColor
-        
+//        tabBar.tintColor = .mainColor
+//        tabBar.unselectedItemTintColor = .greyColor
+//        
         let topic = TopicViewController()
         let nav1 = UINavigationController(rootViewController: topic)
         nav1.tabBarItem = UITabBarItem(title: "", image: UIImage(named: "tab_trend"), selectedImage: UIImage(named: "tab_trend_inactive"))

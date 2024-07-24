@@ -17,7 +17,6 @@
 		0339601F2C4E42D800614EF2 /* launchImg.png in Resources */ = {isa = PBXBuildFile; fileRef = 0339601C2C4E42D800614EF2 /* launchImg.png */; };
 		033960222C4E432600614EF2 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 033960212C4E432600614EF2 /* SnapKit */; };
 		033960252C4E433C00614EF2 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 033960242C4E433C00614EF2 /* Kingfisher */; };
-		033960282C4E435700614EF2 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 033960272C4E435700614EF2 /* RealmSwift */; };
 		0339602B2C4E436E00614EF2 /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 0339602A2C4E436E00614EF2 /* Toast */; };
 		0339602D2C4E43D800614EF2 /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0339602C2C4E43D800614EF2 /* BaseViewController.swift */; };
 		033960302C4E483300614EF2 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 0339602F2C4E483300614EF2 /* Then */; };
@@ -30,7 +29,26 @@
 		0339603E2C4E5C7B00614EF2 /* ProfileImageSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0339603D2C4E5C7B00614EF2 /* ProfileImageSettingViewController.swift */; };
 		033960402C4E5CC100614EF2 /* ProfileImageSettingCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0339603F2C4E5CC100614EF2 /* ProfileImageSettingCollectionViewCell.swift */; };
 		033960432C4E650B00614EF2 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 033960422C4E650B00614EF2 /* IQKeyboardManagerSwift */; };
+		034F39CF2C50F4330043E273 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 034F39CE2C50F4330043E273 /* RealmSwift */; };
+		034F39D02C50F4910043E273 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 034F39CE2C50F4330043E273 /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		034F39D32C5118A80043E273 /* TopicTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034F39D22C5118A80043E273 /* TopicTableViewCell.swift */; };
+		034F39D72C511EF30043E273 /* TopicCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034F39D62C511EF30043E273 /* TopicCollectionViewCell.swift */; };
+		034F39D92C511F0E0043E273 /* BaseCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034F39D82C511F0E0043E273 /* BaseCollectionViewCell.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		034F39D12C50F4910043E273 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				034F39D02C50F4910043E273 /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		033960032C4E258000614EF2 /* Picha.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Picha.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,6 +70,9 @@
 		0339603B2C4E5C0800614EF2 /* LikeSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeSearchViewController.swift; sourceTree = "<group>"; };
 		0339603D2C4E5C7B00614EF2 /* ProfileImageSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageSettingViewController.swift; sourceTree = "<group>"; };
 		0339603F2C4E5CC100614EF2 /* ProfileImageSettingCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageSettingCollectionViewCell.swift; sourceTree = "<group>"; };
+		034F39D22C5118A80043E273 /* TopicTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicTableViewCell.swift; sourceTree = "<group>"; };
+		034F39D62C511EF30043E273 /* TopicCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicCollectionViewCell.swift; sourceTree = "<group>"; };
+		034F39D82C511F0E0043E273 /* BaseCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCollectionViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,9 +80,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				034F39CF2C50F4330043E273 /* RealmSwift in Frameworks */,
 				033960302C4E483300614EF2 /* Then in Frameworks */,
 				0339602B2C4E436E00614EF2 /* Toast in Frameworks */,
-				033960282C4E435700614EF2 /* RealmSwift in Frameworks */,
 				033960252C4E433C00614EF2 /* Kingfisher in Frameworks */,
 				033960222C4E432600614EF2 /* SnapKit in Frameworks */,
 				033960432C4E650B00614EF2 /* IQKeyboardManagerSwift in Frameworks */,
@@ -99,6 +120,8 @@
 				0339603F2C4E5CC100614EF2 /* ProfileImageSettingCollectionViewCell.swift */,
 				033960332C4E58D500614EF2 /* TabBarController.swift */,
 				033960352C4E5B1200614EF2 /* TopicViewController.swift */,
+				034F39D22C5118A80043E273 /* TopicTableViewCell.swift */,
+				034F39D62C511EF30043E273 /* TopicCollectionViewCell.swift */,
 				033960372C4E5B3500614EF2 /* RandomViewController.swift */,
 				033960392C4E5B8100614EF2 /* SearchViewController.swift */,
 				0339603B2C4E5C0800614EF2 /* LikeSearchViewController.swift */,
@@ -108,6 +131,7 @@
 				0339601C2C4E42D800614EF2 /* launchImg.png */,
 				0339601A2C4E42D800614EF2 /* launchImg@2x.png */,
 				0339601B2C4E42D800614EF2 /* launchImg@3x.png */,
+				034F39D82C511F0E0043E273 /* BaseCollectionViewCell.swift */,
 			);
 			path = Picha;
 			sourceTree = "<group>";
@@ -122,6 +146,7 @@
 				03395FFF2C4E258000614EF2 /* Sources */,
 				033960002C4E258000614EF2 /* Frameworks */,
 				033960012C4E258000614EF2 /* Resources */,
+				034F39D12C50F4910043E273 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -131,10 +156,10 @@
 			packageProductDependencies = (
 				033960212C4E432600614EF2 /* SnapKit */,
 				033960242C4E433C00614EF2 /* Kingfisher */,
-				033960272C4E435700614EF2 /* RealmSwift */,
 				0339602A2C4E436E00614EF2 /* Toast */,
 				0339602F2C4E483300614EF2 /* Then */,
 				033960422C4E650B00614EF2 /* IQKeyboardManagerSwift */,
+				034F39CE2C50F4330043E273 /* RealmSwift */,
 			);
 			productName = Picha;
 			productReference = 033960032C4E258000614EF2 /* Picha.app */;
@@ -167,10 +192,10 @@
 			packageReferences = (
 				033960202C4E432600614EF2 /* XCRemoteSwiftPackageReference "SnapKit" */,
 				033960232C4E433C00614EF2 /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				033960262C4E435700614EF2 /* XCRemoteSwiftPackageReference "realm-swift" */,
 				033960292C4E436E00614EF2 /* XCRemoteSwiftPackageReference "Toast-Swift" */,
 				0339602E2C4E483300614EF2 /* XCRemoteSwiftPackageReference "Then" */,
 				033960412C4E650B00614EF2 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
+				034F39CD2C50F4330043E273 /* XCRemoteSwiftPackageReference "realm-swift" */,
 			);
 			productRefGroup = 033960042C4E258000614EF2 /* Products */;
 			projectDirPath = "";
@@ -203,11 +228,14 @@
 			files = (
 				0339600B2C4E258000614EF2 /* OnBoardingViewController.swift in Sources */,
 				0339603C2C4E5C0800614EF2 /* LikeSearchViewController.swift in Sources */,
+				034F39D32C5118A80043E273 /* TopicTableViewCell.swift in Sources */,
 				0339602D2C4E43D800614EF2 /* BaseViewController.swift in Sources */,
 				033960322C4E544000614EF2 /* ProfileViewController.swift in Sources */,
+				034F39D92C511F0E0043E273 /* BaseCollectionViewCell.swift in Sources */,
 				0339603A2C4E5B8100614EF2 /* SearchViewController.swift in Sources */,
 				033960072C4E258000614EF2 /* AppDelegate.swift in Sources */,
 				033960342C4E58D500614EF2 /* TabBarController.swift in Sources */,
+				034F39D72C511EF30043E273 /* TopicCollectionViewCell.swift in Sources */,
 				033960382C4E5B3500614EF2 /* RandomViewController.swift in Sources */,
 				033960092C4E258000614EF2 /* SceneDelegate.swift in Sources */,
 				033960362C4E5B1200614EF2 /* TopicViewController.swift in Sources */,
@@ -451,14 +479,6 @@
 				minimumVersion = 7.12.0;
 			};
 		};
-		033960262C4E435700614EF2 /* XCRemoteSwiftPackageReference "realm-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/realm/realm-swift.git";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 		033960292C4E436E00614EF2 /* XCRemoteSwiftPackageReference "Toast-Swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scalessec/Toast-Swift.git";
@@ -483,6 +503,14 @@
 				minimumVersion = 7.1.1;
 			};
 		};
+		034F39CD2C50F4330043E273 /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -495,11 +523,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 033960232C4E433C00614EF2 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
-		};
-		033960272C4E435700614EF2 /* RealmSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 033960262C4E435700614EF2 /* XCRemoteSwiftPackageReference "realm-swift" */;
-			productName = RealmSwift;
 		};
 		0339602A2C4E436E00614EF2 /* Toast */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -515,6 +538,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 033960412C4E650B00614EF2 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
 			productName = IQKeyboardManagerSwift;
+		};
+		034F39CE2C50F4330043E273 /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 034F39CD2C50F4330043E273 /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
