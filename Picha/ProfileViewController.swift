@@ -48,46 +48,16 @@ class ProfileViewController: BaseViewController {
         $0.axis = .vertical
         $0.spacing = 10
     }
-//    let buttonE = UIButton().then {
-//        $0.setTitle("E", for: .normal)
-//        $0.setTitleColor(.mainColor, for: .selected)
-//        $0.setTitleColor(.greyColor, for: .disabled)
-//    }
-//    let buttonI = UIButton().then {
-//        $0.setTitle("E", for: .normal)
-//        $0.setTitleColor(.mainColor, for: .selected)
-//        $0.setTitleColor(.greyColor, for: .disabled)
-//    }
     let snStackView = UIStackView().then {
         $0.distribution = .fillEqually
         $0.axis = .vertical
         $0.spacing = 10
     }
-//    let buttonS = UIButton().then {
-//        $0.setTitle("S", for: .normal)
-//        $0.setTitleColor(.mainColor, for: .selected)
-//        $0.setTitleColor(.greyColor, for: .disabled)
-//    }
-//    let buttonN = UIButton().then {
-//        $0.setTitle("N", for: .normal)
-//        $0.setTitleColor(.mainColor, for: .selected)
-//        $0.setTitleColor(.greyColor, for: .disabled)
-//    }
     let tfStackView = UIStackView().then {
         $0.distribution = .fillEqually
         $0.axis = .vertical
         $0.spacing = 10
     }
-//    let buttonT = UIButton().then {
-//        $0.setTitle("T", for: .normal)
-//        $0.setTitleColor(.mainColor, for: .selected)
-//        $0.setTitleColor(.greyColor, for: .disabled)
-//    }
-//    let buttonF = UIButton().then {
-//        $0.setTitle("F", for: .normal)
-//        $0.setTitleColor(.mainColor, for: .selected)
-//        $0.setTitleColor(.greyColor, for: .disabled)
-//    }
     let jpStackView = UIStackView().then {
         $0.distribution = .fillEqually
         $0.axis = .vertical
@@ -193,8 +163,16 @@ class ProfileViewController: BaseViewController {
         for button in buttons {
             if button.tag == selectedButton.tag {
                 button.isSelected.toggle()
-                button.backgroundColor = button.isSelected ? .mainColor : .white
-                UserDefaults.standard.setValue(button.tag, forKey: "\(button.tag)")
+                //mbti 버튼 다시 터치해서 취소해도 userdefaults는 남아있던 문제 해결!
+                if button.isSelected {
+                    button.backgroundColor = .mainColor
+                    UserDefaults.standard.setValue(button.tag, forKey: "\(button.tag)")
+                } else {
+                    button.backgroundColor = .white
+                    if UserDefaults.standard.string(forKey: "\(button.tag)") != nil {
+                        UserDefaults.standard.removeObject(forKey: "\(button.tag)")
+                    }
+                }
             }
             else {
                 button.isSelected = false
