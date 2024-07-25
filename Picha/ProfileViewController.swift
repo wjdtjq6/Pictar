@@ -63,15 +63,8 @@ class ProfileViewController: BaseViewController {
         $0.axis = .vertical
         $0.spacing = 10
     }
-    lazy var completeButton = UIButton().then {
-        $0.tintColor = .white
-        $0.titleLabel?.font = .boldSystemFont(ofSize: 18)
-        //$0.backgroundColor = .mainColor //TODO: button
-        $0.backgroundColor = .greyColor //TODO: button
-        $0.layer.cornerRadius = 25
-        $0.addTarget(self, action: #selector(completeButtonClicked), for: .touchUpInside)
-    }
-    
+    let completeButton = UIButton()
+    let withdrawButton = UIButton()
     let warnings = ["@", "#", "$", "%", "  "]
     let mbtiButtons = [
             ["E","I"],
@@ -79,13 +72,47 @@ class ProfileViewController: BaseViewController {
             ["T","F"],
             ["J","P"]
     ]
+    var selectedMBTI: [String: Int] = [:]//TODO: completebuttonpress에만 저장되도록!
     override func viewDidLoad() {
         super.viewDidLoad()
         configureHierarchy()
         configureLayout()
         configureUI()
         setButtons()
-        completeButton.isEnabled = true//TODO: button
+        if navigationItem.title == "EDIT PROFILE" {
+            completeButton.isHidden = true
+            navigationItem.rightBarButtonItem?.isEnabled = false
+        }
+        mbtiButtonsShow()
+    }
+    func mbtiButtonsShow() {
+        let ei = UserDefaults.standard.value(forKey: "EI") as? Int
+        let sn = UserDefaults.standard.value(forKey: "SN") as? Int
+        let tf = UserDefaults.standard.value(forKey: "TF") as? Int
+        let jp = UserDefaults.standard.value(forKey: "JP") as? Int
+        if let ei {
+            updateButtonSelection(buttons: eiButtons, selectedTag: ei)
+        }
+        if let sn {
+            updateButtonSelection(buttons: snButtons, selectedTag: sn)
+        }
+        if let tf {
+            updateButtonSelection(buttons: tfButtons, selectedTag: tf)
+        }
+        if let jp {
+            updateButtonSelection(buttons: jpButtons, selectedTag: jp)
+        }
+    }
+    func updateButtonSelection(buttons: [UIButton], selectedTag: Int) {
+        for button in buttons {
+            if button.tag == selectedTag {
+                button.isSelected = true
+                button.backgroundColor = .mainColor
+            } else {
+                button.isSelected = false
+                button.backgroundColor = .white
+            }
+        }
     }
     override func viewWillAppear(_ animated: Bool) {
         profileButton.setImage(UIImage(named: "profile_"+UserDefaults.standard.string(forKey: "profile")!), for: .normal)
@@ -103,6 +130,7 @@ class ProfileViewController: BaseViewController {
         mbtiStackView.addArrangedSubview(tfStackView)
         mbtiStackView.addArrangedSubview(jpStackView)
         view.addSubview(completeButton)
+        view.addSubview(withdrawButton)
     }
     func setButtons() {
         var tagCount: [String] = []
@@ -147,41 +175,33 @@ class ProfileViewController: BaseViewController {
     @objc func buttonPressed(sender: UIButton) {
         switch sender.tag {
         case 1, 2:
-            updateSelection(buttons: eiButtons, selectedButton: sender)
+            updateSelection(buttons: eiButtons, selectedButton: sender, mbtiType: "EI")
         case 3, 4:
-            updateSelection(buttons: snButtons, selectedButton: sender)
+            updateSelection(buttons: snButtons, selectedButton: sender, mbtiType: "SN")
         case 5, 6:
-            updateSelection(buttons: tfButtons, selectedButton: sender)
+            updateSelection(buttons: tfButtons, selectedButton: sender, mbtiType: "TF")
         case 7, 8:
-            updateSelection(buttons: jpButtons, selectedButton: sender)
+            updateSelection(buttons: jpButtons, selectedButton: sender, mbtiType: "JP")
         default:
             print("error")
         }
-        completeButtonChanges()//TODO: button
+        completeButtonChanges()
     }
-    func updateSelection(buttons: [UIButton], selectedButton: UIButton) {
+    func updateSelection(buttons: [UIButton], selectedButton: UIButton, mbtiType: String) {
         for button in buttons {
             if button.tag == selectedButton.tag {
                 button.isSelected.toggle()
-                //mbti 버튼 다시 터치해서 취소해도 userdefaults는 남아있던 문제 해결!
                 if button.isSelected {
                     button.backgroundColor = .mainColor
-                    UserDefaults.standard.setValue(button.tag, forKey: "\(button.tag)")
+                    selectedMBTI[mbtiType] = button.tag
                 } else {
                     button.backgroundColor = .white
-                    if UserDefaults.standard.string(forKey: "\(button.tag)") != nil {
-                        UserDefaults.standard.removeObject(forKey: "\(button.tag)")
-                    }
+                    selectedMBTI.removeValue(forKey: mbtiType)
                 }
             }
             else {
                 button.isSelected = false
                 button.backgroundColor = .white
-                //guard문을 사용하면 for문을 한 번 밖에 안돌고 빠져나가서 2,4,6,8 버튼들이 처음에 안눌림(간헐적으로 눌렸던건 에러??)
-                //guard UserDefaults.standard.string(forKey: "\(button.tag)") != nil else { return }
-                if UserDefaults.standard.string(forKey: "\(button.tag)") != nil {
-                    UserDefaults.standard.removeObject(forKey: "\(button.tag)")
-                }
             }
         }
     }
@@ -227,6 +247,11 @@ class ProfileViewController: BaseViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
             make.height.equalTo(50)
         }
+        withdrawButton.snp.makeConstraints { make in
+            make.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(40)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
+            make.height.equalTo(10)
+        }
     }
     override func configureUI() {
         navigationItem.backButtonTitle = ""
@@ -234,8 +259,9 @@ class ProfileViewController: BaseViewController {
             UserDefaults.standard.set(Int.random(in: 0...11), forKey: "profile")
         }
         profileButton.setImage(UIImage(named: "profile_"+UserDefaults.standard.string(forKey: "profile")!), for: .normal)//맨 위에 있으면 nil
-
-        if UserDefaults.standard.string(forKey: "nickname") != nil {
+        
+        //닉네임 유무가 아니라 "isUser"유무로 해도될듯
+        if (UserDefaults.standard.string(forKey: "nickname") != nil)/* && (UserDefaults.standard.string(forKey: "1") != nil || UserDefaults.standard.string(forKey: "2") != nil) && (UserDefaults.standard.string(forKey: "3") != nil || UserDefaults.standard.string(forKey: "4") != nil) && (UserDefaults.standard.string(forKey: "5") != nil || UserDefaults.standard.string(forKey: "6") != nil) && (UserDefaults.standard.string(forKey: "7") != nil || UserDefaults.standard.string(forKey: "8") != nil) */{
             navigationItem.title = "EDIT PROFILE"
 
             let rightBarButton = UIBarButtonItem(title: "저장", style: .plain, target: self, action: #selector(completeButtonClicked))//pop??
@@ -246,46 +272,57 @@ class ProfileViewController: BaseViewController {
             navigationItem.rightBarButtonItem = rightBarButton
             
             nicknameTextField.text = UserDefaults.standard.string(forKey: "nickname")
+            
+            let title = "회원탈퇴"
+            let attributes: [NSAttributedString.Key: Any] = [
+                .underlineStyle: NSUnderlineStyle.single.rawValue,
+                .font: UIFont.systemFont(ofSize: 13)
+            ]
+            let attributedTitle = NSAttributedString(string: title, attributes: attributes)
+            withdrawButton.setAttributedTitle(attributedTitle, for: .normal)
+            withdrawButton.setTitleColor(.mainColor, for: .normal)
+            withdrawButton.addTarget(self, action: #selector(withdrawButtonPressed), for: .touchUpInside)
         }
         else {
             navigationItem.title = "PROFILE SETTING"
-
+            completeButton.tintColor = .white
+            completeButton.titleLabel?.font = .boldSystemFont(ofSize: 18)
+            completeButton.backgroundColor = .greyColor
+            completeButton.layer.cornerRadius = 25
+            completeButton.addTarget(self, action: #selector(completeButtonClicked), for: .touchUpInside)
+            completeButton.isEnabled = true
             completeButton.setTitle("완료", for: .normal)
         }
-        
     }
-    //TODO: button //평소에 회색이다가 ("사용할 수 있는" && mbti userdefaults == true) 일때 블루
-    //그렇다면 1.닉네임바뀔때 isenable = false 2.userdefaultes == true 일때 isenable = false
+    @objc func withdrawButtonPressed() {
+        print(#function)
+    }
     func completeButtonChanges() {
-        if warningLabel.text == "사용할 수 있는 닉네임이에요" && (UserDefaults.standard.string(forKey: "1") != nil || UserDefaults.standard.string(forKey: "2") != nil) && (UserDefaults.standard.string(forKey: "3") != nil || UserDefaults.standard.string(forKey: "4") != nil) && (UserDefaults.standard.string(forKey: "5") != nil || UserDefaults.standard.string(forKey: "6") != nil) && (UserDefaults.standard.string(forKey: "7") != nil || UserDefaults.standard.string(forKey: "8") != nil) {
-            completeButton.isEnabled = true
+        print(selectedMBTI)
+        //.count가 아니라...userdefault에 모두 있으면!
+        if UserDefaults.standard.value(forKey: "EI") && (warningLabel.text == "사용할 수 있는 닉네임이에요" || warningLabel.text == "") {
             completeButton.backgroundColor = .mainColor
+            navigationItem.rightBarButtonItem?.isEnabled = true
         } else {
-            completeButton.isEnabled = false
-            completeButton.backgroundColor = .greyColor        }
+            completeButton.backgroundColor = .greyColor
+            completeButton.isEnabled = true
+            navigationItem.rightBarButtonItem?.isEnabled = false
+        }
     }
     @objc func completeButtonClicked() {
-        if warningLabel.text == "사용할 수 있는 닉네임이에요" && (UserDefaults.standard.string(forKey: "1") != nil || UserDefaults.standard.string(forKey: "2") != nil) && (UserDefaults.standard.string(forKey: "3") != nil || UserDefaults.standard.string(forKey: "4") != nil) && (UserDefaults.standard.string(forKey: "5") != nil || UserDefaults.standard.string(forKey: "6") != nil) && (UserDefaults.standard.string(forKey: "7") != nil || UserDefaults.standard.string(forKey: "8") != nil) {
-            warningLabel.textColor = .mainColor
-            UserDefaults.standard.set(nicknameTextField.text, forKey: "nickname")
-            UserDefaults.standard.set(true, forKey: "isUser")
-            //
-            completeButton.isEnabled = false
-            //
-            let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
-            let SceneDelegate = windowScene?.delegate as? SceneDelegate
-            
-            let navigationController = TabBarController()
+        UserDefaults.standard.set(selectedMBTI["EI"], forKey: "EI")
+        UserDefaults.standard.set(selectedMBTI["SN"], forKey: "SN")
+        UserDefaults.standard.set(selectedMBTI["TF"], forKey: "TF")
+        UserDefaults.standard.set(selectedMBTI["JP"], forKey: "JP")
+        UserDefaults.standard.set(nicknameTextField.text, forKey: "nickname")
         
-            SceneDelegate?.window?.rootViewController = navigationController
-            SceneDelegate?.window?.makeKeyAndVisible()
-        }
-        if UserDefaults.standard.string(forKey: "date") == nil {
-            let df = DateFormatter()
-            df.dateFormat = "yyyy.MM.dd"
-            let str = df.string(from: Date())
-            UserDefaults.standard.set(str, forKey: "date")
-        }
+        let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+        let SceneDelegate = windowScene?.delegate as? SceneDelegate
+
+        let navigationController = TabBarController()
+
+        SceneDelegate?.window?.rootViewController = navigationController
+        SceneDelegate?.window?.makeKeyAndVisible()
     }
     @objc func nicknameWarning() {
         warningLabel.textColor = .warningColor
@@ -327,7 +364,7 @@ class ProfileViewController: BaseViewController {
             warningLabel.text = "사용할 수 없는 닉네임입니다"
             warningLabel.textColor = .warningColor
         }
-        completeButtonChanges()//TODO: button
+        completeButtonChanges()
     }
     @objc func profileButtonClicked() {
         let vc = ProfileImageSettingViewController()

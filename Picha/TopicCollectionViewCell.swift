@@ -10,6 +10,8 @@ import SnapKit
 
 class TopicCollectionViewCell: BaseCollectionViewCell {
     static let id = "TopicCollectionViewCell"
+    let imageView = UIImageView().then { _ in
+    }
     let likeButton = UIButton().then {
         $0.setImage(UIImage(systemName: "star.fill"), for: .normal)
         $0.imageView?.contentMode = .scaleAspectFit
@@ -24,9 +26,13 @@ class TopicCollectionViewCell: BaseCollectionViewCell {
         super.init(frame: frame)
     }
     override func configureHierarchy() {
+        contentView.addSubview(imageView)
         contentView.addSubview(likeButton)
     }
     override func configureLayout() {
+        imageView.snp.makeConstraints { make in
+            make.edges.equalTo(contentView.safeAreaLayoutGuide)
+        }
         likeButton.snp.makeConstraints { make in
             make.bottom.leading.equalTo(contentView.safeAreaLayoutGuide).inset(10)
         }

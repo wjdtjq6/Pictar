@@ -1,6 +1,15 @@
 {
-  "originHash" : "bd7b48f6e343b54499c902d1c0e6254c6a8ee93d362f057491bb90cdf16763cb",
+  "originHash" : "bc7ea40ab5e408f3e24bf7331cb113f1fe1c2dae43871171fea9bc97bb3e221d",
   "pins" : [
+    {
+      "identity" : "alamofire",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Alamofire/Alamofire.git",
+      "state" : {
+        "revision" : "f455c2975872ccd2d9c81594c658af65716e9b9a",
+        "version" : "5.9.1"
+      }
+    },
     {
       "identity" : "iqkeyboardmanager",
       "kind" : "remoteSourceControl",

@@ -18,7 +18,6 @@ class TopicTableViewCell: UITableViewCell {
         layout.minimumInteritemSpacing = 0
         layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         let object = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        object.backgroundColor = .magenta
         return object
     }()
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -36,7 +35,6 @@ class TopicTableViewCell: UITableViewCell {
         }
     }
     func configureUI() {
-        collectionView.backgroundColor = .blue
     }
     @available(*, unavailable)
     required init?(coder: NSCoder) {
