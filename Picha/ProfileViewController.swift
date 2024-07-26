@@ -92,15 +92,19 @@ class ProfileViewController: BaseViewController {
         let jp = UserDefaults.standard.value(forKey: "JP") as? Int
         if let ei {
             updateButtonSelection(buttons: eiButtons, selectedTag: ei)
+            selectedMBTI["EI"] = ei//EDIT PROFILE
         }
         if let sn {
             updateButtonSelection(buttons: snButtons, selectedTag: sn)
+            selectedMBTI["SN"] = sn//EDIT PROFILE
         }
         if let tf {
             updateButtonSelection(buttons: tfButtons, selectedTag: tf)
+            selectedMBTI["TF"] = tf//EDIT PROFILE
         }
         if let jp {
             updateButtonSelection(buttons: jpButtons, selectedTag: jp)
+            selectedMBTI["JP"] = jp//EDIT PROFILE
         }
     }
     func updateButtonSelection(buttons: [UIButton], selectedTag: Int) {
@@ -296,11 +300,35 @@ class ProfileViewController: BaseViewController {
     }
     @objc func withdrawButtonPressed() {
         print(#function)
+        showAlert(title: "탈퇴하기", message: "탈퇴를 하면 데이터가 모두 초기화됩니다. 탈퇴 하시겠습니까?", ok: "확인") {
+            if let appDomain = Bundle.main.bundleIdentifier {
+                UserDefaults.standard.removePersistentDomain(forName: appDomain) }
+            self.selectedMBTI.removeAll()
+
+            let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+            let SceneDelegate = windowScene?.delegate as? SceneDelegate
+            
+            let navigationController = OnBoardingViewController()
+            
+            SceneDelegate?.window?.rootViewController = UINavigationController(rootViewController: navigationController)
+            SceneDelegate?.window?.makeKeyAndVisible()
+        }
+    }
+    func showAlert(title: String, message: String, ok:String, completionHandler: @escaping () -> Void) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let cancel = UIAlertAction(title: "취소", style: .cancel)
+        let delete = UIAlertAction(title: ok, style: .destructive) { _ in
+            completionHandler()
+        }
+        alert.addAction(cancel)
+        alert.addAction(delete)
+        present(alert, animated: true)
     }
     func completeButtonChanges() {
         print(selectedMBTI)
         //.count가 아니라...userdefault에 모두 있으면!
-        if UserDefaults.standard.value(forKey: "EI") && (warningLabel.text == "사용할 수 있는 닉네임이에요" || warningLabel.text == "") {
+        let allButtons = eiButtons + snButtons + tfButtons + jpButtons
+        if (allButtons.filter {$0.backgroundColor == .mainColor}.count == 4) && (warningLabel.text == "사용할 수 있는 닉네임이에요" || warningLabel.text == nil) {
             completeButton.backgroundColor = .mainColor
             navigationItem.rightBarButtonItem?.isEnabled = true
         } else {
@@ -315,7 +343,7 @@ class ProfileViewController: BaseViewController {
         UserDefaults.standard.set(selectedMBTI["TF"], forKey: "TF")
         UserDefaults.standard.set(selectedMBTI["JP"], forKey: "JP")
         UserDefaults.standard.set(nicknameTextField.text, forKey: "nickname")
-        
+        UserDefaults.standard.setValue(true, forKey: "isUser")
         let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
         let SceneDelegate = windowScene?.delegate as? SceneDelegate
 

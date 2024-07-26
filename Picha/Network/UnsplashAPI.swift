@@ -32,9 +32,7 @@ struct Medium: Decodable {
 class UnsplashAPI {
     static let shared = UnsplashAPI()
     private init() {}
-    
-    //var list = [Photos]()
-    
+        
     func photos<T: Decodable>(api: UnsplashRequest,model: T.Type, completionHandler: @escaping (T?) -> Void) {
         AF.request(api.endPoint, method: .get, parameters: api.parameter, encoding: URLEncoding(destination: .queryString)).responseDecodable(of: T.self) { response in
             print(response.response?.statusCode ?? 0)
