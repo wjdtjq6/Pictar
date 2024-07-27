@@ -10,7 +10,7 @@ import Alamofire
 
 enum UnsplashRequest {
     case photos(topicID: String)
-    case search(query: String, page: Int, pre_page: Int, color: String)
+    case search(query: String, page: Int, pre_page: Int,order_by:String/*, color: String*/)
     case photosStatistics(imageID: String)
     case photosRandom
     
@@ -36,8 +36,8 @@ enum UnsplashRequest {
         switch self {
         case .photos, .photosStatistics, .photosRandom:
             return ["client_id": APIKey.client_id]
-        case .search(let query, let page, let pre_page, let color):
-            return ["client_id": APIKey.client_id,"query": query, "page": page, "per_page": 20, "color": color]
+        case .search(let query, let page, let pre_page,let order_by/*, let color*/):
+            return ["client_id": APIKey.client_id,"query": query, "page": page, "per_page": 20, "order_by":order_by/*, "color": color*/]
         }
     }
 }

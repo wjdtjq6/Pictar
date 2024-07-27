@@ -52,18 +52,19 @@ class TopicViewController: BaseViewController {
         configureHierarchy()
         configureLayout()
         configureUI()
-        UnsplashAPI.shared.photos(api: .photos(topicID: "golden-hour"), model: [Photos].self) { value in
-            self.goldenList = value!
-            self.tableView.reloadData()
-        }
-        UnsplashAPI.shared.photos(api: .photos(topicID: "business-work"), model: [Photos].self) { value in
-            self.buisnessList = value!
-            self.tableView.reloadData()
-        }
-        UnsplashAPI.shared.photos(api: .photos(topicID: "architecture-interior"), model: [Photos].self) { value in
-            self.architectureList = value!
-            self.tableView.reloadData()
-        }
+        //TODO: 403
+//        UnsplashAPI.shared.photos(api: .photos(topicID: "golden-hour"), model: [Photos].self) { value in
+//            self.goldenList = value!
+//            self.tableView.reloadData()
+//        }
+//        UnsplashAPI.shared.photos(api: .photos(topicID: "business-work"), model: [Photos].self) { value in
+//            self.buisnessList = value!
+//            self.tableView.reloadData()
+//        }
+//        UnsplashAPI.shared.photos(api: .photos(topicID: "architecture-interior"), model: [Photos].self) { value in
+//            self.architectureList = value!
+//            self.tableView.reloadData()
+//        }
     }
     override func configureHierarchy() {
         view.addSubview(titleLabel)
@@ -148,16 +149,16 @@ extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSou
         switch collectionView.tag {
         case 0: let url = goldenList[indexPath.item].urls.small
             cell.imageView.kf.setImage(with: URL(string: url))
-            cell.likeButton.setTitle(" \(goldenList[indexPath.item].likes.formatted())  ", for: .normal)
+            cell.likesButton.setTitle(" \(goldenList[indexPath.item].likes.formatted())  ", for: .normal)
         case 1: let url = buisnessList[indexPath.item].urls.small
             cell.imageView.kf.setImage(with: URL(string: url))
-            cell.likeButton.setTitle(" \(buisnessList[indexPath.item].likes.formatted())  ", for: .normal)
+            cell.likesButton.setTitle(" \(buisnessList[indexPath.item].likes.formatted())  ", for: .normal)
         case 2: let url = architectureList[indexPath.item].urls.small
             cell.imageView.kf.setImage(with: URL(string: url))
-            cell.likeButton.setTitle(" \(architectureList[indexPath.item].likes.formatted())  ", for: .normal)
+            cell.likesButton.setTitle(" \(architectureList[indexPath.item].likes.formatted())  ", for: .normal)
         default:
             cell.imageView.image = UIImage(systemName: "star.fill")
-            cell.likeButton.setTitle(" error  ", for: .normal)
+            cell.likesButton.setTitle(" error  ", for: .normal)
         }
         return cell
     }

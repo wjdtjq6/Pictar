@@ -10,6 +10,5 @@ import UIKit
 class LikeSearchViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemYellow
     }
 }

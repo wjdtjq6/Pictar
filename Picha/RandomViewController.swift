@@ -10,6 +10,5 @@ import UIKit
 class RandomViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .red
     }
 }

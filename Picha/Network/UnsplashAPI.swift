@@ -13,33 +13,67 @@ struct Photos: Decodable {
     let created_at: String
     let width: Int
     let height: Int
-    let urls: Urls
+    let urls: PhotosUrls
     let likes: Int
-    let user: User
+    let user: PhotosUser
 }
-struct Urls: Decodable {
+struct PhotosUrls: Decodable {
     let raw: String
     let small: String
 }
-struct User: Decodable {
+struct PhotosUser: Decodable {
     let name: String
-    let profile_image: Medium
+    let profile_image: PhotosMedium
 }
-struct Medium: Decodable {
+struct PhotosMedium: Decodable {
     let medium: String
 }
 
+struct Search: Decodable {
+    let total_pages: Int
+    var results: [SearchResults]//SearchViewController에서 pagenation의 .append(contentsOf: value!.results)때문에 var로 바꿈
+}
+struct SearchResults: Decodable {
+    let id: String
+    let created_at: String
+    let width: Int
+    let height: Int
+    let urls: SearchUrls
+    let likes: Int
+    let user: SearchUser
+}
+struct SearchUrls: Decodable {
+    let raw: String
+    let small: String
+}
+struct SearchUser: Decodable {
+    let name: String
+    let profile_image: SearchMedium
+}
+struct SearchMedium: Decodable {
+    let medium: String
+}
 class UnsplashAPI {
     static let shared = UnsplashAPI()
     private init() {}
         
     func photos<T: Decodable>(api: UnsplashRequest,model: T.Type, completionHandler: @escaping (T?) -> Void) {
         AF.request(api.endPoint, method: .get, parameters: api.parameter, encoding: URLEncoding(destination: .queryString)).responseDecodable(of: T.self) { response in
-            print(response.response?.statusCode ?? 0)
             switch response.result {
             case .success(let value):
                 completionHandler(value)
                 //self.tableView.reloadData()
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+    func search<T: Decodable>(api: UnsplashRequest, model: T.Type, completionHandler: @escaping (T?) -> Void) {
+        AF.request(api.endPoint, method: .get, parameters: api.parameter, encoding: URLEncoding(destination: .queryString)).responseDecodable(of: T.self) { response in
+            print(response.response?.statusCode ?? 0)
+            switch response.result {
+            case .success(let value):
+                completionHandler(value)
             case .failure(let error):
                 print(error)
             }

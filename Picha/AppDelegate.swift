@@ -16,7 +16,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         IQKeyboardManager.shared.enable = true // iqkeyboard
         sleep(1)
         return true
-        
     }
 
     // MARK: UISceneSession Lifecycle

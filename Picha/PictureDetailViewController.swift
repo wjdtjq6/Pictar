@@ -10,7 +10,6 @@ import UIKit
 class PictureDetailViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        //view.backgroundColor = .orange
         navigationItem.title = ""
     }
 }
