@@ -7,7 +7,7 @@
 
 import Foundation
 import UIKit
-
+@frozen
 enum Colors: String, CaseIterable {
     case black_and_white ,black, white, yellow, orange, red, purple, magenta, green, teal ,blue ,empty
     

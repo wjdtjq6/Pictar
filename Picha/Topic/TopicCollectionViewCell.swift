@@ -13,12 +13,9 @@ class TopicCollectionViewCell: BaseCollectionViewCell {
     let imageView = UIImageView().then { _ in
     }
     let likesButton = UIButton().then {
-        $0.setImage(UIImage(systemName: "star.fill"), for: .normal)
         $0.imageView?.contentMode = .scaleAspectFit
         $0.imageEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 0)
-        $0.setTitle(" 1,000  ", for: .normal)
         $0.tintColor = .systemYellow
-        $0.backgroundColor = .greyColor
         $0.layer.cornerRadius = 10
         $0.titleLabel?.font = .systemFont(ofSize: 10)
     }

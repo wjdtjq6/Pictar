@@ -43,6 +43,7 @@
 		034F3A092C53851C0043E273 /* SearchCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034F3A082C53851C0043E273 /* SearchCollectionViewCell.swift */; };
 		034F3A0C2C5395770043E273 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034F3A0B2C5395770043E273 /* Colors.swift */; };
 		034F3A0E2C54FEE10043E273 /* RealmModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034F3A0D2C54FEE10043E273 /* RealmModel.swift */; };
+		0354EEA32C56399400B9B555 /* FileManager+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0354EEA22C56399400B9B555 /* FileManager+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -90,6 +91,7 @@
 		034F3A082C53851C0043E273 /* SearchCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchCollectionViewCell.swift; sourceTree = "<group>"; };
 		034F3A0B2C5395770043E273 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		034F3A0D2C54FEE10043E273 /* RealmModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmModel.swift; sourceTree = "<group>"; };
+		0354EEA22C56399400B9B555 /* FileManager+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileManager+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,6 +152,7 @@
 				0339601B2C4E42D800614EF2 /* launchImg@3x.png */,
 				034F3A0B2C5395770043E273 /* Colors.swift */,
 				034F3A0D2C54FEE10043E273 /* RealmModel.swift */,
+				0354EEA22C56399400B9B555 /* FileManager+Extension.swift */,
 			);
 			path = Picha;
 			sourceTree = "<group>";
@@ -311,6 +314,7 @@
 				033960342C4E58D500614EF2 /* TabBarController.swift in Sources */,
 				034F39D72C511EF30043E273 /* TopicCollectionViewCell.swift in Sources */,
 				033960382C4E5B3500614EF2 /* RandomViewController.swift in Sources */,
+				0354EEA32C56399400B9B555 /* FileManager+Extension.swift in Sources */,
 				034F3A092C53851C0043E273 /* SearchCollectionViewCell.swift in Sources */,
 				033960092C4E258000614EF2 /* SceneDelegate.swift in Sources */,
 				033960362C4E5B1200614EF2 /* TopicViewController.swift in Sources */,

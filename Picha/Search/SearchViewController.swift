@@ -75,14 +75,19 @@ class SearchViewController: BaseViewController {
     //create 1.Realm 위치 찾기
     let realm = try! Realm()
     
-    var realmList: Results<likeList>!//realm 빈애열?
+    var realmList: Results<LikeList>!//realm 빈애열?
     override func viewDidLoad() {
+        print(#function)
         super.viewDidLoad()
         configureHierarchy()
         configureLayout()
         configureUI()
-        //bottomCollectionView.reloadData() 왜 필요한지 모르겠음
-        realmList = realm.objects(likeList.self)//realm 빈배열에 realm값 넣어주기?
+        //bottomCollectionView.reloadData() //왜 필요한지 모르겠음
+        realmList = realm.objects(LikeList.self)//realm 빈배열에 realm값 넣어주기?
+        print(realm.configuration.fileURL)
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        bottomCollectionView.reloadData()
     }
     override func configureHierarchy() {
         view.addSubview(searchBar)
@@ -135,6 +140,8 @@ class SearchViewController: BaseViewController {
         topCollectionView.showsHorizontalScrollIndicator = false
         topCollectionView.keyboardDismissMode = .onDrag //keyboard hide
         bottomCollectionView.keyboardDismissMode = .onDrag //keyboard hide
+        navigationItem.backButtonTitle = ""
+        navigationController?.navigationBar.tintColor = .black
     }
     //keyboard hide
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -180,7 +187,7 @@ class SearchViewController: BaseViewController {
 extension SearchViewController: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         for i in indexPaths {
-            if i.row == list.results.count-2 && page <= list.total_pages {
+            if i.row == list.results.count-1 && page < list.total_pages {
                 page += 1
                 toggleCall()
             }
@@ -199,6 +206,12 @@ extension SearchViewController: UISearchBarDelegate {
    //pagenation end
 }
 extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print(indexPath.item)
+        let vc = PictureDetailViewController()
+        vc.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(vc, animated: true)
+    }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == topCollectionView {
             Colors.allCases.count
@@ -231,45 +244,56 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TopicCollectionViewCell.id, for: indexPath) as! TopicCollectionViewCell
             cell.likeFuncButton.addTarget(self, action: #selector(likeButtonPressed(sender:)), for: .touchUpInside)
             cell.likeFuncButton.tag = indexPath.item
-            if UserDefaults.standard.bool(forKey: "like") {
-                cell.likeFuncButton.setImage(UIImage(named: "like_circle"), for: .normal)
+            cell.likeFuncButton.setImage(UIImage(named: "like_circle_inactive"), for: .normal)//버튼 누리기 전에 안보여서
+            if let existingLike = realmList.first(where: { $0.id == list.results[indexPath.item].id }) {
+                //updateLikeButton(button: cell.likeFuncButton, isLiked: existingLike.isLiked)
+                cell.likeFuncButton.setImage(UIImage(named:"like_circle"), for: .normal)
             }
-            else {
-                cell.likeFuncButton.setImage(UIImage(named: "like_circle_inactive"), for: .normal)
-            }
+            //likesButton
+            cell.likesButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
+            cell.likesButton.backgroundColor = .greyColor
+            //
             //TODO: var list = Search? 하면 deque??해야하나? 옵셔널해제로 되나?
             let urlString = list.results[indexPath.item].urls.small
             let url = URL(string: urlString)
             cell.imageView.kf.setImage(with: url)
             cell.likesButton.setTitle(" \(list.results[indexPath.item].likes.formatted())  ", for: .normal)
             return cell
-            
         }
     }
+    func downloadImage(from url: URL, completion: @escaping(UIImage?) -> Void) {
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            guard let data = data, error == nil else {
+                print("fauled to download image:",error ?? "")
+                completion(nil)
+                return
+            }
+            completion(UIImage(data: data))
+        }
+        task.resume()
+    }
     @objc func likeButtonPressed(sender: UIButton) {
-        print(sender.tag)
+        let photoID = list.results[sender.tag].id
         
-        //2.
-        let data = likeList(id: list.results[sender.tag].id)
-        //3.
-        
-        if true {
-            //존재하면
+        if let existingLike = realmList.first(where: { $0.id == photoID }) {
+            try! realm.write{
+                removeImageFromDocumnet(filename: photoID)
+                sender.setImage(UIImage(named: "like_circle_inactive"), for: .normal)
+                realm.delete(existingLike)
+            }
+        } 
+        else {
+            let data = LikeList(id: photoID, date: Date())
             try! realm.write{
                 realm.add(data)
-                print(realm)
-                print(realm.configuration.fileURL)
-                print(realmList,"realmList")
-                print("----------")
-                print(realm.objects(likeList.self),"object")
-                print("==========")
-            }
-        } else {
-            //존재하지 않으면
-            if let delete = realmList.first(where: { $0.id == list.results[sender.tag].id }) {
-                try! realm.write {
-                    realm.delete(delete)
-                    print("Realm 삭제 성공")
+                sender.setImage(UIImage(named: "like_circle"), for: .normal)
+                let urlString = list.results[sender.tag].urls.small
+                if let url = URL(string: urlString) {
+                    downloadImage(from: url) { image in
+                        if let image = image {
+                            self.saveImageToDocument(image: image, filename: photoID)
+                        }
+                    }
                 }
             }
         }

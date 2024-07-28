@@ -8,6 +8,7 @@
 import UIKit
 import Then
 import SnapKit
+import RealmSwift
 
 class ProfileViewController: BaseViewController {
     lazy var profileButton = UIButton().then {
@@ -73,6 +74,8 @@ class ProfileViewController: BaseViewController {
             ["J","P"]
     ]
     var selectedMBTI: [String: Int] = [:]//TODO: completebuttonpress에만 저장되도록!
+    //create 1.Realm 위치 찾기
+    let realm = try! Realm()
     override func viewDidLoad() {
         super.viewDidLoad()
         configureHierarchy()
@@ -302,9 +305,14 @@ class ProfileViewController: BaseViewController {
         print(#function)
         showAlert(title: "탈퇴하기", message: "탈퇴를 하면 데이터가 모두 초기화됩니다. 탈퇴 하시겠습니까?", ok: "확인") {
             if let appDomain = Bundle.main.bundleIdentifier {
-                UserDefaults.standard.removePersistentDomain(forName: appDomain) }
+                UserDefaults.standard.removePersistentDomain(forName: appDomain)
+            }
             self.selectedMBTI.removeAll()
-
+            try! self.realm.write{
+                self.realm.deleteAll()
+            }
+            self.removeImageAll()
+            
             let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
             let SceneDelegate = windowScene?.delegate as? SceneDelegate
             

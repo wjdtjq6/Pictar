@@ -52,19 +52,18 @@ class TopicViewController: BaseViewController {
         configureHierarchy()
         configureLayout()
         configureUI()
-        //TODO: 403
-//        UnsplashAPI.shared.photos(api: .photos(topicID: "golden-hour"), model: [Photos].self) { value in
-//            self.goldenList = value!
-//            self.tableView.reloadData()
-//        }
-//        UnsplashAPI.shared.photos(api: .photos(topicID: "business-work"), model: [Photos].self) { value in
-//            self.buisnessList = value!
-//            self.tableView.reloadData()
-//        }
-//        UnsplashAPI.shared.photos(api: .photos(topicID: "architecture-interior"), model: [Photos].self) { value in
-//            self.architectureList = value!
-//            self.tableView.reloadData()
-//        }
+        UnsplashAPI.shared.photos(api: .photos(topicID: "golden-hour"), model: [Photos].self) { value in
+            self.goldenList = value!
+            self.tableView.reloadData()
+        }
+        UnsplashAPI.shared.photos(api: .photos(topicID: "business-work"), model: [Photos].self) { value in
+            self.buisnessList = value!
+            self.tableView.reloadData()
+        }
+        UnsplashAPI.shared.photos(api: .photos(topicID: "architecture-interior"), model: [Photos].self) { value in
+            self.architectureList = value!
+            self.tableView.reloadData()
+        }
     }
     override func configureHierarchy() {
         view.addSubview(titleLabel)
@@ -127,10 +126,45 @@ extension TopicViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    //TODO: 줄이기
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(collectionView.tag)
-        print(indexPath.item)
         let vc = PictureDetailViewController()
+        //통신 내용 담은 list를 보내주는게 아니라, realm에 저장하고, 그걸 보여줘야함
+        switch collectionView.tag {
+        case 0: let userImageUrl = goldenList[indexPath.item].user.profile_image.medium
+            vc.userImage.kf.setImage(with: URL(string: userImageUrl))
+            let smallImageUrl = goldenList[indexPath.item].urls.small
+            vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
+            vc.userName.text = goldenList[indexPath.item].user.name
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+            let convertDate = dateFormatter.date(from: goldenList[indexPath.item].created_at)
+            print(convertDate)
+            let myDateFormatter = DateFormatter()
+            myDateFormatter.dateFormat = "yyyy년 MM월 dd일 게시됨"
+            let convertStr = myDateFormatter.string(from: convertDate!)
+            vc.createdDate.text = convertStr
+            vc.sizeValueLabel.text = "\(goldenList[indexPath.item].width) x \(goldenList[indexPath.item].height)"
+            //vc.countValueLabel.text =
+            //vc.downloadValueLabel.text =
+        case 1: let userImageUrl = buisnessList[indexPath.item].user.profile_image.medium
+            vc.userImage.kf.setImage(with: URL(string: userImageUrl))
+            let smallImageUrl = buisnessList[indexPath.item].urls.small
+            vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
+            vc.userName.text = buisnessList[indexPath.item].user.name
+            vc.createdDate.text = buisnessList[indexPath.item].created_at
+            vc.sizeValueLabel.text = "\(buisnessList[indexPath.item].width) x \(buisnessList[indexPath.item].height)"
+        case 2: let userImageUrl = architectureList[indexPath.item].user.profile_image.medium
+            vc.userImage.kf.setImage(with: URL(string: userImageUrl))
+            let smallImageUrl = architectureList[indexPath.item].urls.small
+            vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
+            vc.userName.text = architectureList[indexPath.item].user.name
+            vc.createdDate.text = architectureList[indexPath.item].created_at
+            vc.sizeValueLabel.text = "\(architectureList[indexPath.item].width) x \(architectureList[indexPath.item].height)"
+        default:
+            print("let vc = PictureDetailViewController()")
+        }
+        //
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }
@@ -146,6 +180,10 @@ extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSou
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TopicCollectionViewCell.id, for: indexPath) as! TopicCollectionViewCell
         cell.imageView.layer.cornerRadius = 10
         cell.imageView.clipsToBounds = true
+        //likesButton
+        cell.likesButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
+        cell.likesButton.backgroundColor = .greyColor
+        //
         switch collectionView.tag {
         case 0: let url = goldenList[indexPath.item].urls.small
             cell.imageView.kf.setImage(with: URL(string: url))

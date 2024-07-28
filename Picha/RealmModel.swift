@@ -8,22 +8,12 @@
 import Foundation
 import RealmSwift
 //realm에 무슨 데이터를 넣을까?:
-class likeList: Object {
+class LikeList: Object {
     @Persisted(primaryKey: true) var id: String
-    
-    convenience init(id: String) {
+    @Persisted var date = Date()
+    convenience init(id: String, date: Date) {
         self.init()
         self.id = id
+        //self.date = Date()
     }
 }
-/*
- struct SearchResults: Decodable {
-     let id: String
-     let created_at: String
-     let width: Int
-     let height: Int
-     let urls: SearchUrls
-     let likes: Int         //노필요
-     let user: SearchUser
- }
- */
