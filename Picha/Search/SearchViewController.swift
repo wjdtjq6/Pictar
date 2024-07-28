@@ -283,19 +283,19 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
             }
         } 
         else {
-            let data = LikeList(id: photoID, date: Date())
-            try! realm.write{
-                realm.add(data)
-                sender.setImage(UIImage(named: "like_circle"), for: .normal)
-                let urlString = list.results[sender.tag].urls.small
-                if let url = URL(string: urlString) {
-                    downloadImage(from: url) { image in
-                        if let image = image {
-                            self.saveImageToDocument(image: image, filename: photoID)
-                        }
-                    }
-                }
-            }
+//            let data = LikeList(id: photoID, date: Date())
+//            try! realm.write{
+//                realm.add(data)
+//                sender.setImage(UIImage(named: "like_circle"), for: .normal)
+//                let urlString = list.results[sender.tag].urls.small
+//                if let url = URL(string: urlString) {
+//                    downloadImage(from: url) { image in
+//                        if let image = image {
+//                            self.saveImageToDocument(image: image, filename: photoID)
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 }

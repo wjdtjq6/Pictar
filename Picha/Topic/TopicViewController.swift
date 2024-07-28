@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import Then
 import Kingfisher
+import RealmSwift
 
 class TopicViewController: BaseViewController {
     let profileButton = UIButton().then {
@@ -47,14 +48,17 @@ class TopicViewController: BaseViewController {
     var goldenList = [Photos]()
     var buisnessList = [Photos]()
     var architectureList = [Photos]()
+    var list = Statistics(id: "", downloads: Downloads(total: 0), views: Views(total: 0))
+    let realm = try! Realm()
+    var realmList: Results<LikeList>!
     override func viewDidLoad() {
         super.viewDidLoad()
         configureHierarchy()
         configureLayout()
         configureUI()
-        UnsplashAPI.shared.photos(api: .photos(topicID: "golden-hour"), model: [Photos].self) { value in
-            self.goldenList = value!
-            self.tableView.reloadData()
+        UnsplashAPI.shared.photos(api: .photos(topicID: "golden-hour"), model: [Photos].self) {[self] value in
+            goldenList = value!
+            tableView.reloadData()
         }
         UnsplashAPI.shared.photos(api: .photos(topicID: "business-work"), model: [Photos].self) { value in
             self.buisnessList = value!
@@ -64,6 +68,7 @@ class TopicViewController: BaseViewController {
             self.architectureList = value!
             self.tableView.reloadData()
         }
+        realmList = realm.objects(LikeList.self)
     }
     override func configureHierarchy() {
         view.addSubview(titleLabel)
@@ -126,48 +131,78 @@ extension TopicViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSource {
-    //TODO: 줄이기
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let vc = PictureDetailViewController()
-        //통신 내용 담은 list를 보내주는게 아니라, realm에 저장하고, 그걸 보여줘야함
-        switch collectionView.tag {
-        case 0: let userImageUrl = goldenList[indexPath.item].user.profile_image.medium
+        let goldenData = goldenList[indexPath.item]
+        let bData = buisnessList[indexPath.item]
+        let aData = architectureList[indexPath.item]
+
+        func fetchDataAndAddToRealm(imageID: String, data: Photos, group: DispatchGroup) {
+            group.enter()
+            UnsplashAPI.shared.photosStatistics(api: .photosStatistics(imageID: imageID), model: Statistics.self) { value in
+                guard let list = value else {
+                    group.leave()
+                    return
+                }
+                let newData = LikeList(id: list.id, date: Date(), userImage: data.user.profile_image.medium, smallImage: data.urls.small, userName: data.user.name, createdDate: data.created_at, width: data.width, height: data.height, count: list.views.total, downloadValue: list.downloads.total)
+                self.addDataToRealm(data: newData)
+                group.leave()
+            }
+        }
+
+        let group = DispatchGroup()
+
+        if collectionView.tag == 0 {
+            fetchDataAndAddToRealm(imageID: goldenData.id, data: goldenData, group: group)
+        } else if collectionView.tag == 1 {
+            fetchDataAndAddToRealm(imageID: bData.id, data: bData, group: group)
+        } else {
+            fetchDataAndAddToRealm(imageID: aData.id, data: aData, group: group)
+        }
+
+        group.notify(queue: .main) { [weak self] in
+            guard let self = self else { return }
+            self.updateUI(vc: vc)
+        }
+    }
+
+    private func addDataToRealm(data: LikeList) {
+        do {
+            try self.realm.write {
+                self.realm.add(data)
+                print("Data added to Realm: \(data)")
+            }
+        } catch {
+            print("Realm error: \(error)")
+        }
+    }
+
+    private func updateUI(vc: PictureDetailViewController) {
+        if let lastItem = realmList.last {
+            let userImageUrl = lastItem.userImage
             vc.userImage.kf.setImage(with: URL(string: userImageUrl))
-            let smallImageUrl = goldenList[indexPath.item].urls.small
+            let smallImageUrl = lastItem.smallImage
             vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
-            vc.userName.text = goldenList[indexPath.item].user.name
+            vc.userName.text = lastItem.userName
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-            let convertDate = dateFormatter.date(from: goldenList[indexPath.item].created_at)
-            print(convertDate)
-            let myDateFormatter = DateFormatter()
-            myDateFormatter.dateFormat = "yyyy년 MM월 dd일 게시됨"
-            let convertStr = myDateFormatter.string(from: convertDate!)
-            vc.createdDate.text = convertStr
-            vc.sizeValueLabel.text = "\(goldenList[indexPath.item].width) x \(goldenList[indexPath.item].height)"
-            //vc.countValueLabel.text =
-            //vc.downloadValueLabel.text =
-        case 1: let userImageUrl = buisnessList[indexPath.item].user.profile_image.medium
-            vc.userImage.kf.setImage(with: URL(string: userImageUrl))
-            let smallImageUrl = buisnessList[indexPath.item].urls.small
-            vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
-            vc.userName.text = buisnessList[indexPath.item].user.name
-            vc.createdDate.text = buisnessList[indexPath.item].created_at
-            vc.sizeValueLabel.text = "\(buisnessList[indexPath.item].width) x \(buisnessList[indexPath.item].height)"
-        case 2: let userImageUrl = architectureList[indexPath.item].user.profile_image.medium
-            vc.userImage.kf.setImage(with: URL(string: userImageUrl))
-            let smallImageUrl = architectureList[indexPath.item].urls.small
-            vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
-            vc.userName.text = architectureList[indexPath.item].user.name
-            vc.createdDate.text = architectureList[indexPath.item].created_at
-            vc.sizeValueLabel.text = "\(architectureList[indexPath.item].width) x \(architectureList[indexPath.item].height)"
-        default:
-            print("let vc = PictureDetailViewController()")
+            if let convertDate = dateFormatter.date(from: lastItem.createdDate) {
+                let myDateFormatter = DateFormatter()
+                myDateFormatter.dateFormat = "yyyy년 MM월 dd일 게시됨"
+                let convertStr = myDateFormatter.string(from: convertDate)
+                vc.createdDate.text = convertStr
+            }
+            vc.sizeValueLabel.text = "\(lastItem.width) x \(lastItem.height)"
+            vc.countValueLabel.text = "\(lastItem.count)"
+            vc.downloadValueLabel.text = "\(lastItem.downloadValue)"
+        } else {
+            print("realm list is empty")
         }
-        //
-        vc.hidesBottomBarWhenPushed = true
+
         navigationController?.pushViewController(vc, animated: true)
+        vc.hidesBottomBarWhenPushed = true
     }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch collectionView.tag {
         case 0: return goldenList.count
@@ -176,6 +211,7 @@ extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSou
         default: return 0
         }
     }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TopicCollectionViewCell.id, for: indexPath) as! TopicCollectionViewCell
         cell.imageView.layer.cornerRadius = 10
@@ -183,21 +219,25 @@ extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSou
         //likesButton
         cell.likesButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
         cell.likesButton.backgroundColor = .greyColor
-        //
+        
         switch collectionView.tag {
-        case 0: let url = goldenList[indexPath.item].urls.small
+        case 0:
+            let url = goldenList[indexPath.item].urls.small
             cell.imageView.kf.setImage(with: URL(string: url))
             cell.likesButton.setTitle(" \(goldenList[indexPath.item].likes.formatted())  ", for: .normal)
-        case 1: let url = buisnessList[indexPath.item].urls.small
+        case 1:
+            let url = buisnessList[indexPath.item].urls.small
             cell.imageView.kf.setImage(with: URL(string: url))
             cell.likesButton.setTitle(" \(buisnessList[indexPath.item].likes.formatted())  ", for: .normal)
-        case 2: let url = architectureList[indexPath.item].urls.small
+        case 2:
+            let url = architectureList[indexPath.item].urls.small
             cell.imageView.kf.setImage(with: URL(string: url))
             cell.likesButton.setTitle(" \(architectureList[indexPath.item].likes.formatted())  ", for: .normal)
         default:
             cell.imageView.image = UIImage(systemName: "star.fill")
             cell.likesButton.setTitle(" error  ", for: .normal)
         }
+        
         return cell
     }
 }

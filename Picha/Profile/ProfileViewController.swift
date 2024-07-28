@@ -336,7 +336,7 @@ class ProfileViewController: BaseViewController {
         print(selectedMBTI)
         //.count가 아니라...userdefault에 모두 있으면!
         let allButtons = eiButtons + snButtons + tfButtons + jpButtons
-        if (allButtons.filter {$0.backgroundColor == .mainColor}.count == 4) && (warningLabel.text == "사용할 수 있는 닉네임이에요" || warningLabel.text == nil) {
+        if (allButtons.filter {$0.backgroundColor == .mainColor}.count == 4) && (warningLabel.text == "사용할 수 있는 닉네임이에요") {
             completeButton.backgroundColor = .mainColor
             navigationItem.rightBarButtonItem?.isEnabled = true
         } else {

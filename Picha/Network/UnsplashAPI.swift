@@ -53,6 +53,19 @@ struct SearchUser: Decodable {
 struct SearchMedium: Decodable {
     let medium: String
 }
+
+struct Statistics: Decodable {
+    let id: String
+    let downloads: Downloads
+    let views: Views
+}
+struct Downloads: Decodable {
+    let total: Int
+}
+struct Views: Decodable {
+    let total: Int
+}
+
 class UnsplashAPI {
     static let shared = UnsplashAPI()
     private init() {}
@@ -69,6 +82,16 @@ class UnsplashAPI {
         }
     }
     func search<T: Decodable>(api: UnsplashRequest, model: T.Type, completionHandler: @escaping (T?) -> Void) {
+        AF.request(api.endPoint, method: .get, parameters: api.parameter, encoding: URLEncoding(destination: .queryString)).responseDecodable(of: T.self) { response in
+            switch response.result {
+            case .success(let value):
+                completionHandler(value)
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+    func photosStatistics<T: Decodable>(api: UnsplashRequest, model: T.Type, completionHandler: @escaping (T?) -> Void) {
         AF.request(api.endPoint, method: .get, parameters: api.parameter, encoding: URLEncoding(destination: .queryString)).responseDecodable(of: T.self) { response in
             print(response.response?.statusCode ?? 0)
             switch response.result {

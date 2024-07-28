@@ -152,13 +152,6 @@ class PictureDetailViewController: BaseViewController {
         appearence.configureWithOpaqueBackground()
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearence
         self.navigationController?.navigationBar.standardAppearance = appearence
-//        userImage.image = UIImage(systemName: "square.fill")
-//        userName.text = "Jimmy So"
-//        createdDate.text = "2024년 7월 28일 게시됨"
-//        smallImage.image = UIImage(systemName: "square.fill")
-//        sizeValueLabel.text = "8888 x 8888"
-        countValueLabel.text = "8,888,888"
-        downloadValueLabel.text = "888,888"
     }
     @objc func likeFuncButtonPressed() {
         

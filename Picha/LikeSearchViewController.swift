@@ -129,30 +129,6 @@ class LikeSearchViewController: BaseViewController {
     }
 }
 extension LikeSearchViewController: UICollectionViewDelegate, UICollectionViewDataSource {
-    //TODO: 줄이기
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let vc = PictureDetailViewController()
-        let realmData = realmList[indexPath.item].
-
-        let userImageUrl = realmList[indexPath.item].user.profile_image.medium
-            vc.userImage.kf.setImage(with: URL(string: userImageUrl))
-            let smallImageUrl = goldenList[indexPath.item].urls.small
-            vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
-            vc.userName.text = goldenList[indexPath.item].user.name
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-            let convertDate = dateFormatter.date(from: goldenList[indexPath.item].created_at)
-            print(convertDate)
-            let myDateFormatter = DateFormatter()
-            myDateFormatter.dateFormat = "yyyy년 MM월 dd일 게시됨"
-            let convertStr = myDateFormatter.string(from: convertDate!)
-            vc.createdDate.text = convertStr
-            vc.sizeValueLabel.text = "\(goldenList[indexPath.item].width) x \(goldenList[indexPath.item].height)"
-            //vc.countValueLabel.text =
-            //vc.downloadValueLabel.text =
-        vc.hidesBottomBarWhenPushed = true
-        navigationController?.pushViewController(vc, animated: true)
-    }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         print(indexPath.item)
         let vc = PictureDetailViewController()
