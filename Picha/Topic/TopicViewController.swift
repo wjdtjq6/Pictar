@@ -133,68 +133,71 @@ extension TopicViewController: UITableViewDataSource, UITableViewDelegate {
 extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let vc = PictureDetailViewController()
-        let goldenData = goldenList[indexPath.item]
-        let bData = buisnessList[indexPath.item]
-        let aData = architectureList[indexPath.item]
+        let imageID: String
+        let data: Photos
 
-        func fetchDataAndAddToRealm(imageID: String, data: Photos, group: DispatchGroup) {
-            group.enter()
-            UnsplashAPI.shared.photosStatistics(api: .photosStatistics(imageID: imageID), model: Statistics.self) { value in
-                guard let list = value else {
-                    group.leave()
-                    return
-                }
-                let newData = LikeList(id: list.id, date: Date(), userImage: data.user.profile_image.medium, smallImage: data.urls.small, userName: data.user.name, createdDate: data.created_at, width: data.width, height: data.height, count: list.views.total, downloadValue: list.downloads.total)
-                self.addDataToRealm(data: newData)
-                group.leave()
-            }
+        if collectionView.tag == 0 {
+            imageID = goldenList[indexPath.item].id
+            data = goldenList[indexPath.item]
+        } else if collectionView.tag == 1 {
+            imageID = buisnessList[indexPath.item].id
+            data = buisnessList[indexPath.item]
+        } else {
+            imageID = architectureList[indexPath.item].id
+            data = architectureList[indexPath.item]
         }
 
         let group = DispatchGroup()
-
-        if collectionView.tag == 0 {
-            fetchDataAndAddToRealm(imageID: goldenData.id, data: goldenData, group: group)
-        } else if collectionView.tag == 1 {
-            fetchDataAndAddToRealm(imageID: bData.id, data: bData, group: group)
-        } else {
-            fetchDataAndAddToRealm(imageID: aData.id, data: aData, group: group)
+        group.enter()
+        UnsplashAPI.shared.photosStatistics(api: .photosStatistics(imageID: imageID), model: Statistics.self) { value in
+            guard let list = value else {
+                group.leave()
+                return
+            }
+            let newData = LikeList(id: list.id, date: Date(), userImage: data.user.profile_image.medium, smallImage: data.urls.small, userName: data.user.name, createdDate: data.created_at, width: data.width, height: data.height, count: list.views.total, downloadValue: list.downloads.total)
+            self.addDataToRealm(data: newData)
+            group.leave()
         }
-
         group.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            self.updateUI(vc: vc)
+            self.updateUI(vc: vc, imageID: imageID)
         }
     }
 
     private func addDataToRealm(data: LikeList) {
-        do {
-            try self.realm.write {
-                self.realm.add(data)
-                print("Data added to Realm: \(data)")
+        let existingData = realm.objects(LikeList.self).filter("id == %@", data.id).first
+        if existingData == nil {
+            do {
+                try self.realm.write {
+                    self.realm.add(data)
+                    print("Data added to Realm: \(data)")
+                }
+            } catch {
+                print("Realm error: \(error)")
             }
-        } catch {
-            print("Realm error: \(error)")
+        } else {
+            print("Data already exists in Realm: \(data)")
         }
     }
 
-    private func updateUI(vc: PictureDetailViewController) {
-        if let lastItem = realmList.last {
-            let userImageUrl = lastItem.userImage
+    private func updateUI(vc: PictureDetailViewController, imageID: String) {
+        if let data = realm.objects(LikeList.self).filter("id == %@", imageID).first {
+            let userImageUrl = data.userImage
             vc.userImage.kf.setImage(with: URL(string: userImageUrl))
-            let smallImageUrl = lastItem.smallImage
+            let smallImageUrl = data.smallImage
             vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
-            vc.userName.text = lastItem.userName
+            vc.userName.text = data.userName
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-            if let convertDate = dateFormatter.date(from: lastItem.createdDate) {
+            if let convertDate = dateFormatter.date(from: data.createdDate) {
                 let myDateFormatter = DateFormatter()
                 myDateFormatter.dateFormat = "yyyy년 MM월 dd일 게시됨"
                 let convertStr = myDateFormatter.string(from: convertDate)
                 vc.createdDate.text = convertStr
             }
-            vc.sizeValueLabel.text = "\(lastItem.width) x \(lastItem.height)"
-            vc.countValueLabel.text = "\(lastItem.count)"
-            vc.downloadValueLabel.text = "\(lastItem.downloadValue)"
+            vc.sizeValueLabel.text = "\(data.width) x \(data.height)"
+            vc.countValueLabel.text = "\(data.count)"
+            vc.downloadValueLabel.text = "\(data.downloadValue)"
         } else {
             print("realm list is empty")
         }
