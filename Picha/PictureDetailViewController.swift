@@ -21,7 +21,7 @@ class PictureDetailViewController: BaseViewController {
         $0.font = .boldSystemFont(ofSize: 11)
     }
     let likeFuncButton = UIButton().then {
-        $0.setImage(UIImage(named: "like_circle"), for: .normal)
+        $0.setImage(UIImage(named: "like_circle_inactive"), for: .normal)
         $0.setImage(UIImage(named: "like_circle"), for: .selected)
         $0.addTarget(self, action: #selector(likeFuncButtonPressed), for: .touchUpInside)
     }
@@ -63,6 +63,10 @@ class PictureDetailViewController: BaseViewController {
         configureHierarchy()
         configureLayout()
         configureUI()
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        likeFuncButton.setImage(UIImage(named: "like_circle_inactive"), for: .normal)
+        likeFuncButton.setImage(UIImage(named: "like_circle"), for: .selected)
     }
     override func configureHierarchy() {
         view.addSubview(userImage)
@@ -154,6 +158,5 @@ class PictureDetailViewController: BaseViewController {
         self.navigationController?.navigationBar.standardAppearance = appearence
     }
     @objc func likeFuncButtonPressed() {
-        
     }
 }

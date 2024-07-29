@@ -63,7 +63,7 @@ class SearchViewController: BaseViewController {
     //var list: [SearchResults] = []
 
     //var list = [Search]()
-    var list = Search(total_pages: 0, results: [])
+    var searchList = Search(total_pages: 0, results: [])
     /*== var list = Search?
         {
             didSet {
@@ -74,8 +74,8 @@ class SearchViewController: BaseViewController {
     var page = 1
     //create 1.Realm 위치 찾기
     let realm = try! Realm()
-    
     var realmList: Results<LikeList>!//realm 빈애열?
+    var StatisticsList = Statistics(id: "", downloads: Downloads(total: 0), views: Views(total: 0))
     override func viewDidLoad() {
         print(#function)
         super.viewDidLoad()
@@ -171,13 +171,13 @@ class SearchViewController: BaseViewController {
                 self.bottomCollectionView.isHidden = false
                 //pagenation
                 if self.page == 1 {
-                    self.list = value!
+                    self.searchList = value!
                 } else {
-                    self.list.results.append(contentsOf: value!.results)
+                    self.searchList.results.append(contentsOf: value!.results)
                 }
                 self.bottomCollectionView.reloadData()
                 
-                if self.page == 1 && self.list.results.isEmpty {
+                if self.page == 1 && self.searchList.results.isEmpty {
                     self.bottomCollectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .top, animated: true)
                 }
             }
@@ -187,7 +187,7 @@ class SearchViewController: BaseViewController {
 extension SearchViewController: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         for i in indexPaths {
-            if i.row == list.results.count-1 && page < list.total_pages {
+            if i.row == searchList.results.count-1 && page < searchList.total_pages {
                 page += 1
                 toggleCall()
             }
@@ -207,31 +207,118 @@ extension SearchViewController: UISearchBarDelegate {
 }
 extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(indexPath.item)
         let vc = PictureDetailViewController()
-        vc.hidesBottomBarWhenPushed = true
+        let imageID = searchList.results[indexPath.item].id
+        let data = searchList.results[indexPath.item]
+
+        let group = DispatchGroup()
+
+        // Enter the group to handle the statistics fetch
+        group.enter()
+        UnsplashAPI.shared.photosStatistics(api: .photosStatistics(imageID: imageID), model: Statistics.self) { value in
+            guard let list = value else {
+                group.leave()
+                return
+            }
+            let newData = LikeList(id: list.id, date: Date(), userImage: data.user.profile_image.medium, smallImage: data.urls.small, userName: data.user.name, createdDate: data.created_at, width: data.width, height: data.height, count: list.views.total, downloadValue: list.downloads.total, isLike: self.realmList.first(where: { $0.id == imageID })?.isLike ?? false)
+            self.addDataToRealm(data: newData)
+            group.leave()
+        }
+
+        group.enter()
+        if let url = URL(string: data.urls.small) {
+            downloadImage(from: url) { image in
+                if let image = image {
+                    self.saveImageToDocument(image: image, filename: imageID)
+                }
+                group.leave()
+            }
+        } else {
+            group.leave()
+        }
+        group.enter()
+        if let url = URL(string: data.user.profile_image.medium) {
+            downloadImage(from: url) { image in
+                if let image = image {
+                    self.saveImageToDocument(image: image, filename: imageID+"_user")
+                }
+                group.leave()
+            }
+        } else {
+            group.leave()
+        }
+
+        // Notify when all tasks are complete
+        group.notify(queue: .main) { [weak self] in
+            guard let self = self else { return }
+            self.updateUI(vc: vc, imageID: imageID)
+        }
+    }
+
+
+    private func addDataToRealm(data: LikeList) {
+        let existingData = realm.objects(LikeList.self).filter("id == %@", data.id).first
+        if existingData == nil {
+            do {
+                try self.realm.write {
+                    self.realm.add(data)
+                    print("Data added to Realm: \(data)")
+                }
+            } catch {
+                print("Realm error: \(error)")
+            }
+        } else {
+            print("Data already exists in Realm: \(data)")
+        }
+    }
+    
+    private func updateUI(vc: PictureDetailViewController, imageID: String) {
+        if let data = realm.objects(LikeList.self).filter("id == %@", imageID).first {
+            let userImageUrl = data.userImage
+            //vc.userImage.kf.setImage(with: URL(string: userImageUrl))
+            vc.userImage.image = loadImageToDocument(filename: data.id+"_user")
+            let smallImageUrl = data.smallImage
+            //vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
+            vc.smallImage.image = loadImageToDocument(filename: data.id)
+            vc.userName.text = data.userName
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+            if let convertDate = dateFormatter.date(from: data.createdDate) {
+                let myDateFormatter = DateFormatter()
+                myDateFormatter.dateFormat = "yyyy년 MM월 dd일 게시됨"
+                let convertStr = myDateFormatter.string(from: convertDate)
+                vc.createdDate.text = convertStr
+            }
+            vc.sizeValueLabel.text = "\(data.width) x \(data.height)"
+            vc.countValueLabel.text = "\(data.count)"
+            vc.downloadValueLabel.text = "\(data.downloadValue)"
+            vc.likeFuncButton.isSelected = data.isLike//TODO: 좋아요 버튼 검색 완료 후  확인!
+        } else {
+            print("realm list is empty")
+        }
+
         navigationController?.pushViewController(vc, animated: true)
+        vc.hidesBottomBarWhenPushed = true
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == topCollectionView {
             Colors.allCases.count
         } else {
             //TODO: var list = Search?하면 deque??해야하나? 옵셔널해제로 되나?
-            list.results.count
+            searchList.results.count
         }
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == topCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SearchCollectionViewCell.id, for: indexPath) as! SearchCollectionViewCell
             if indexPath.item == 0 {
-                //그냥 circle.fill gray로 바꿀까...
                 cell.colorButton.setImage(UIImage(named: "blackAndWhite"), for: .normal)
                 cell.colorButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 35)
             } else {
                 cell.colorButton.setImage(UIImage(systemName: "circle.fill"), for: .normal)
                 cell.colorButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
             }
-            if indexPath.item == Colors.allCases.count-1 {
+            if indexPath.item == Colors.allCases.count - 1 {
                 cell.colorButton.isHidden = true
             } else {
                 cell.colorButton.isHidden = false
@@ -239,63 +326,114 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
             cell.tintColor = Colors.allCases[indexPath.item].color
             cell.colorButton.setTitle(Colors.allCases[indexPath.item].name, for: .normal)
             return cell
-        }
-        else /*collectionView == bottomCollectionView*/ {
+        } else { // collectionView == bottomCollectionView
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TopicCollectionViewCell.id, for: indexPath) as! TopicCollectionViewCell
-            cell.likeFuncButton.addTarget(self, action: #selector(likeButtonPressed(sender:)), for: .touchUpInside)
+            let result = searchList.results[indexPath.item]
+            
+            // Configure like button
+            let isLiked = realmList.first(where: { $0.id == result.id })?.isLike ?? false
+            cell.likeFuncButton.isSelected = isLiked
+            cell.likeFuncButton.setImage(UIImage(named: "like_circle"), for: .selected)
+            cell.likeFuncButton.setImage(UIImage(named: "like_circle_inactive"), for: .normal)
             cell.likeFuncButton.tag = indexPath.item
-            cell.likeFuncButton.setImage(UIImage(named: "like_circle_inactive"), for: .normal)//버튼 누리기 전에 안보여서
-            if let existingLike = realmList.first(where: { $0.id == list.results[indexPath.item].id }) {
-                //updateLikeButton(button: cell.likeFuncButton, isLiked: existingLike.isLiked)
-                cell.likeFuncButton.setImage(UIImage(named:"like_circle"), for: .normal)
-            }
-            //likesButton
+            cell.likeFuncButton.addTarget(self, action: #selector(likeButtonPressed(sender:)), for: .touchUpInside)
+            
+            // Configure likes button
             cell.likesButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
             cell.likesButton.backgroundColor = .greyColor
-            //
-            //TODO: var list = Search? 하면 deque??해야하나? 옵셔널해제로 되나?
-            let urlString = list.results[indexPath.item].urls.small
+            
+            // Configure image view
+            let urlString = result.urls.small
             let url = URL(string: urlString)
             cell.imageView.kf.setImage(with: url)
-            cell.likesButton.setTitle(" \(list.results[indexPath.item].likes.formatted())  ", for: .normal)
+            cell.likesButton.setTitle(" \(result.likes.formatted())  ", for: .normal)
+            
             return cell
         }
     }
-    func downloadImage(from url: URL, completion: @escaping(UIImage?) -> Void) {
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            guard let data = data, error == nil else {
-                print("fauled to download image:",error ?? "")
-                completion(nil)
-                return
-            }
-            completion(UIImage(data: data))
-        }
-        task.resume()
-    }
+
+    
     @objc func likeButtonPressed(sender: UIButton) {
-        let photoID = list.results[sender.tag].id
-        
-        if let existingLike = realmList.first(where: { $0.id == photoID }) {
-            try! realm.write{
-                removeImageFromDocumnet(filename: photoID)
-                sender.setImage(UIImage(named: "like_circle_inactive"), for: .normal)
-                realm.delete(existingLike)
+        let index = searchList.results[sender.tag]
+        let imageID = index.id
+
+        if let existingLike = realmList.first(where: { $0.id == imageID }) {
+            // 기존 항목의 경우: `isLike` 값을 반전시키고, 이미지 삭제 필요
+            try! realm.write {
+                existingLike.isLike.toggle()
+                let isLikeNow = existingLike.isLike
+                if !isLikeNow {
+                    removeImageFromDocument(filename: imageID)
+                    removeImageFromDocument(filename: imageID + "_user")
+                }
+                sender.isSelected = isLikeNow
             }
-        } 
-        else {
-//            let data = LikeList(id: photoID, date: Date())
-//            try! realm.write{
-//                realm.add(data)
-//                sender.setImage(UIImage(named: "like_circle"), for: .normal)
-//                let urlString = list.results[sender.tag].urls.small
-//                if let url = URL(string: urlString) {
-//                    downloadImage(from: url) { image in
-//                        if let image = image {
-//                            self.saveImageToDocument(image: image, filename: photoID)
-//                        }
-//                    }
-//                }
-//            }
+        } else {
+            // 기존 항목이 아닌 경우: 새 항목을 추가하고 `isLike` 값을 `true`로 설정
+            let group = DispatchGroup()
+
+            let newLikeData = LikeList(
+                id: imageID,
+                date: Date(),
+                userImage: index.user.profile_image.medium,
+                smallImage: index.urls.small,
+                userName: index.user.name,
+                createdDate: index.created_at,
+                width: index.width,
+                height: index.height,
+                count: 0, // 초기화 시점에는 count와 downloadValue를 0으로 설정
+                downloadValue: 0,
+                isLike: true // 새 항목을 추가할 때 `isLike`를 `true`로 설정
+            )
+
+            group.enter()
+            UnsplashAPI.shared.photosStatistics(api: .photosStatistics(imageID: imageID), model: Statistics.self) { value in
+                guard let stats = value else {
+                    group.leave()
+                    return
+                }
+
+                try! self.realm.write {
+                    newLikeData.count = stats.views.total
+                    newLikeData.downloadValue = stats.downloads.total
+                    self.realm.add(newLikeData)
+                    sender.isSelected = true
+                }
+
+                // 이미지 다운로드
+                let imageURL = URL(string: index.urls.small)
+                group.enter()
+                if let url = imageURL {
+                    self.downloadImage(from: url) { image in
+                        if let image = image {
+                            self.saveImageToDocument(image: image, filename: imageID)
+                        }
+                        group.leave()
+                    }
+                } else {
+                    group.leave()
+                }
+
+                // 사용자 이미지 다운로드
+                let userImageURL = URL(string: index.user.profile_image.medium)
+                group.enter()
+                if let url = userImageURL {
+                    self.downloadImage(from: url) { image in
+                        if let image = image {
+                            self.saveImageToDocument(image: image, filename: imageID + "_user")
+                        }
+                        group.leave()
+                    }
+                } else {
+                    group.leave()
+                }
+            }
+
+            group.notify(queue: .main) {
+                // 모든 작업이 완료된 후 필요한 추가 작업을 여기에 추가할 수 있습니다.
+            }
         }
     }
+
 }
+

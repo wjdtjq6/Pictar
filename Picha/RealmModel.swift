@@ -19,7 +19,8 @@ class LikeList: Object {
     @Persisted var height: Int
     @Persisted var count: Int
     @Persisted var downloadValue: Int
-    convenience init(id: String, date: Date, userImage: String, smallImage: String, userName: String, createdDate: String, width: Int, height: Int, count: Int, downloadValue: Int) {
+    @Persisted var isLike: Bool
+    convenience init(id: String, date: Date, userImage: String, smallImage: String, userName: String, createdDate: String, width: Int, height: Int, count: Int, downloadValue: Int, isLike: Bool) {
         self.init()
         self.id = id
         self.userImage = userImage
@@ -30,6 +31,7 @@ class LikeList: Object {
         self.height = height
         self.count = count
         self.downloadValue = downloadValue
+        self.isLike = isLike
         //self.date = Date()
     }
 }

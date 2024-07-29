@@ -58,21 +58,33 @@ class LikeSearchViewController: BaseViewController {
     var likeList: [UIImage] = []
     @objc func toggleButtonPressed() {
         toggleButton.isSelected.toggle()
+        
         if toggleButton.isSelected {
-            realmList = realm.objects(LikeList.self).sorted(byKeyPath: "date", ascending: false) // 과거순
+            // 날짜 기준으로 내림차순 정렬 및 좋아요가 된 항목만 필터링
+            realmList = realm.objects(LikeList.self)
+                .filter("isLike = true")
+                .sorted(byKeyPath: "date", ascending: false)
         } else {
-            realmList = realm.objects(LikeList.self).sorted(byKeyPath: "date", ascending: true) // 최신순
+            // 날짜 기준으로 오름차순 정렬 및 좋아요가 된 항목만 필터링
+            realmList = realm.objects(LikeList.self)
+                .filter("isLike = true")
+                .sorted(byKeyPath: "date", ascending: true)
         }
+        
         bottomCollectionView.reloadData()
     }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         configureHierarchy()
         configureLayout()
         configureUI()
-        realmList = realm.objects(LikeList.self)//realm 빈배열에 realm값 넣어주기?
+        
+        // 초기화 시 좋아요가 된 항목만 로드
+        realmList = realm.objects(LikeList.self).filter("isLike = true")
         print(realm.configuration.fileURL)
     }
+
     override func viewWillAppear(_ animated: Bool) {
         bottomCollectionView.reloadData()
         isEmpty()
@@ -130,11 +142,34 @@ class LikeSearchViewController: BaseViewController {
 }
 extension LikeSearchViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(indexPath.item)
         let vc = PictureDetailViewController()
         vc.hidesBottomBarWhenPushed = true
+
+        if collectionView == bottomCollectionView {
+            // LikeSearchViewController의 bottomCollectionView에서 선택된 경우
+            let realmData = realmList[indexPath.item]
+            let imageID = realmData.id
+            
+            vc.userImage.image = loadImageToDocument(filename: imageID+"_user")
+            vc.smallImage.image = loadImageToDocument(filename: imageID)
+            vc.userName.text = realmData.userName
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+            if let convertDate = dateFormatter.date(from: realmData.createdDate) {
+                let myDateFormatter = DateFormatter()
+                myDateFormatter.dateFormat = "yyyy년 MM월 dd일 게시됨"
+                let convertStr = myDateFormatter.string(from: convertDate)
+                vc.createdDate.text = convertStr
+            }
+            vc.sizeValueLabel.text = "\(realmData.width) x \(realmData.height)"
+            vc.countValueLabel.text = "\(realmData.count)"
+            vc.downloadValueLabel.text = "\(realmData.downloadValue)"
+            vc.likeFuncButton.isSelected = realmData.isLike
+        }
+
         navigationController?.pushViewController(vc, animated: true)
     }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == topCollectionView {
             Colors.allCases.count
@@ -178,27 +213,15 @@ extension LikeSearchViewController: UICollectionViewDelegate, UICollectionViewDa
     }
     @objc func likeButtonPressed(sender: UIButton) {
         let realmData = realmList[sender.tag]
-        try! realm.write{
-            //realmData.isLiked = false
-            //updateLikeButton(button: sender, isLiked: realmData.isLiked)
-            removeImageFromDocumnet(filename: realmData.id)
-            realm.delete(realmData)
-            bottomCollectionView.reloadData()
+        try! realm.write {
+            realmData.isLike.toggle()
+            
+            if !realmData.isLike {
+                removeImageFromDocument(filename: realmData.id)
+                realm.delete(realmData)
+            }
         }
+        bottomCollectionView.reloadData()
         isEmpty()
-//        let photoID = list.results[sender.tag].id
-//        
-//        if let existingLike = realmList.first(where: { $0.id == photoID }) {
-//            try! realm.write{
-//                existingLike.isLiked.toggle()
-//                updateLikeButton(button: sender, isLiked: existingLike.isLiked)
-//            }
-//        } else {
-//            let data = LikeList(id: photoID, bool: true)
-//            try! realm.write{
-//                realm.add(data)
-//                updateLikeButton(button: sender, isLiked: true)
-//            }
-//        }
     }
 }

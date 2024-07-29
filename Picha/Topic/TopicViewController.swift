@@ -100,6 +100,7 @@ class TopicViewController: BaseViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
+        profileButton.setImage(UIImage(named: "profile_"+UserDefaults.standard.string(forKey: "profile")!), for: .normal)
     }
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -136,33 +137,65 @@ extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSou
         let imageID: String
         let data: Photos
 
-        if collectionView.tag == 0 {
+        // Get the appropriate data based on the section of the collection view
+        switch collectionView.tag {
+        case 0:
             imageID = goldenList[indexPath.item].id
             data = goldenList[indexPath.item]
-        } else if collectionView.tag == 1 {
+        case 1:
             imageID = buisnessList[indexPath.item].id
             data = buisnessList[indexPath.item]
-        } else {
+        case 2:
             imageID = architectureList[indexPath.item].id
             data = architectureList[indexPath.item]
+        default:
+            return
         }
 
         let group = DispatchGroup()
+
+        // Enter the group to handle the statistics fetch
         group.enter()
         UnsplashAPI.shared.photosStatistics(api: .photosStatistics(imageID: imageID), model: Statistics.self) { value in
             guard let list = value else {
                 group.leave()
                 return
             }
-            let newData = LikeList(id: list.id, date: Date(), userImage: data.user.profile_image.medium, smallImage: data.urls.small, userName: data.user.name, createdDate: data.created_at, width: data.width, height: data.height, count: list.views.total, downloadValue: list.downloads.total)
+            let newData = LikeList(id: list.id, date: Date(), userImage: data.user.profile_image.medium, smallImage: data.urls.small, userName: data.user.name, createdDate: data.created_at, width: data.width, height: data.height, count: list.views.total, downloadValue: list.downloads.total, isLike: self.realmList.first(where: { $0.id == imageID })?.isLike ?? false)
             self.addDataToRealm(data: newData)
             group.leave()
         }
+
+        group.enter()
+        if let url = URL(string: data.urls.small) {
+            downloadImage(from: url) { image in
+                if let image = image {
+                    self.saveImageToDocument(image: image, filename: imageID)
+                }
+                group.leave()
+            }
+        } else {
+            group.leave()
+        }
+        group.enter()
+        if let url = URL(string: data.user.profile_image.medium) {
+            downloadImage(from: url) { image in
+                if let image = image {
+                    self.saveImageToDocument(image: image, filename: imageID+"_user")
+                }
+                group.leave()
+            }
+        } else {
+            group.leave()
+        }
+
+        // Notify when all tasks are complete
         group.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             self.updateUI(vc: vc, imageID: imageID)
         }
     }
+
 
     private func addDataToRealm(data: LikeList) {
         let existingData = realm.objects(LikeList.self).filter("id == %@", data.id).first
@@ -179,13 +212,15 @@ extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSou
             print("Data already exists in Realm: \(data)")
         }
     }
-
+    
     private func updateUI(vc: PictureDetailViewController, imageID: String) {
         if let data = realm.objects(LikeList.self).filter("id == %@", imageID).first {
             let userImageUrl = data.userImage
-            vc.userImage.kf.setImage(with: URL(string: userImageUrl))
+            //vc.userImage.kf.setImage(with: URL(string: userImageUrl))
+            vc.userImage.image = loadImageToDocument(filename: data.id+"_user")
             let smallImageUrl = data.smallImage
-            vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
+            //vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
+            vc.smallImage.image = loadImageToDocument(filename: data.id)
             vc.userName.text = data.userName
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
@@ -198,6 +233,7 @@ extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSou
             vc.sizeValueLabel.text = "\(data.width) x \(data.height)"
             vc.countValueLabel.text = "\(data.count)"
             vc.downloadValueLabel.text = "\(data.downloadValue)"
+            vc.likeFuncButton.isSelected = data.isLike//TODO: 좋아요 버튼 검색 료 후  확인!
         } else {
             print("realm list is empty")
         }

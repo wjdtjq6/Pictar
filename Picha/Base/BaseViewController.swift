@@ -21,6 +21,17 @@ class BaseViewController: UIViewController {
     }
     func configureUI() {
     }
+    func downloadImage(from url: URL, completion: @escaping(UIImage?) -> Void) {
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            guard let data = data, error == nil else {
+                print("fauled to download image:",error ?? "")
+                completion(nil)
+                return
+            }
+            completion(UIImage(data: data))
+        }
+        task.resume()
+    }
 }
 extension UIColor {
     class var greyColor: UIColor? { return UIColor(named: "GreyColor") }

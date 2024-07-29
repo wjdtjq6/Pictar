@@ -8,6 +8,7 @@
 import UIKit
 
 extension BaseViewController {
+    //엥 realm을 삭제하면 사진도 삭제되네 필요없겠군
     func removeImageAll() {
         if let documentsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
             do {
@@ -20,7 +21,7 @@ extension BaseViewController {
             }
         }
     }
-    func removeImageFromDocumnet(filename: String) {
+    func removeImageFromDocument(filename: String) {
         guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
         let fileURL = documentDirectory.appendingPathComponent("\(filename).jpg")
 //        @available(iOS 16.0, *)
