@@ -233,7 +233,8 @@ extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSou
             vc.sizeValueLabel.text = "\(data.width) x \(data.height)"
             vc.countValueLabel.text = "\(data.count)"
             vc.downloadValueLabel.text = "\(data.downloadValue)"
-            vc.likeFuncButton.isSelected = data.isLike//TODO: 좋아요 버튼 검색 료 후  확인!
+            vc.likeFuncButton.isSelected = data.isLike
+            vc.detailID = data.id//detailviewcontroller에서 사용
         } else {
             print("realm list is empty")
         }

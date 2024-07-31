@@ -73,7 +73,7 @@ class ProfileViewController: BaseViewController {
             ["T","F"],
             ["J","P"]
     ]
-    var selectedMBTI: [String: Int] = [:]//TODO: completebuttonpress에만 저장되도록!
+    var selectedMBTI: [String: Int] = [:]
     //create 1.Realm 위치 찾기
     let realm = try! Realm()
     override func viewDidLoad() {

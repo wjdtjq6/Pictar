@@ -10,6 +10,7 @@ import Then
 import SnapKit
 import Kingfisher
 import RealmSwift
+import Toast
 
 class SearchViewController: BaseViewController {
     let searchBar = UISearchBar().then {
@@ -292,7 +293,8 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
             vc.sizeValueLabel.text = "\(data.width) x \(data.height)"
             vc.countValueLabel.text = "\(data.count)"
             vc.downloadValueLabel.text = "\(data.downloadValue)"
-            vc.likeFuncButton.isSelected = data.isLike//TODO: 좋아요 버튼 검색 완료 후  확인!
+            vc.likeFuncButton.isSelected = data.isLike
+            vc.detailID = data.id//detailviewcontroller에서 사용
         } else {
             print("realm list is empty")
         }
@@ -368,6 +370,7 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
                 }
                 sender.isSelected = isLikeNow
             }
+            self.view.makeToast("좋아요 목록에 추가됐어요!")
         } else {
             // 기존 항목이 아닌 경우: 새 항목을 추가하고 `isLike` 값을 `true`로 설정
             let group = DispatchGroup()
@@ -430,7 +433,7 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
             }
 
             group.notify(queue: .main) {
-                // 모든 작업이 완료된 후 필요한 추가 작업을 여기에 추가할 수 있습니다.
+                self.view.makeToast("좋아요 목록에서 제거됐어요!")
             }
         }
     }

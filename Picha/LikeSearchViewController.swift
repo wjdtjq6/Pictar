@@ -47,7 +47,7 @@ class LikeSearchViewController: BaseViewController {
         return object
     }()
     let noResultLabel = UILabel().then {
-        $0.text = "검색 결과가 없습니다."
+        $0.text = "저장된 사진이 없어요."
         $0.font = .systemFont(ofSize: 20)
         $0.isHidden = true
     }
@@ -165,6 +165,7 @@ extension LikeSearchViewController: UICollectionViewDelegate, UICollectionViewDa
             vc.countValueLabel.text = "\(realmData.count)"
             vc.downloadValueLabel.text = "\(realmData.downloadValue)"
             vc.likeFuncButton.isSelected = realmData.isLike
+            vc.detailID = realmData.id//detailviewcontroller에서 사용
         }
 
         navigationController?.pushViewController(vc, animated: true)
@@ -223,5 +224,6 @@ extension LikeSearchViewController: UICollectionViewDelegate, UICollectionViewDa
         }
         bottomCollectionView.reloadData()
         isEmpty()
+        self.view.makeToast("좋아요 목록에서 제거됐어요!")
     }
 }
