@@ -10,7 +10,7 @@ import Then
 import SnapKit
 import RealmSwift
 
-class PictureDetailViewController: BaseViewController {
+final class PictureDetailViewController: BaseViewController {
     let userImage = UIImageView().then {
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 20
@@ -163,56 +163,40 @@ class PictureDetailViewController: BaseViewController {
         self.navigationController?.navigationBar.standardAppearance = appearence
     }
     @objc func likeFuncButtonPressed(sender: UIButton) {
-        guard let detailID = detailID else {
-            print("detailID가 nil입니다.")
-            return
-        }
-        
         if likeFuncButton.isSelected {
             if let itemToRemove = realmList.first(where: { $0.id == detailID }) {
                 try! realm.write({
-                    // 사진 지우기
+                    //사진 지우고
                     removeImageFromDocument(filename: itemToRemove.id)
                     removeImageFromDocument(filename: itemToRemove.id + "_user")
-                    // 렘에서 지우기
+                    //렘에서 지우고
                     realm.delete(itemToRemove)
                 })
                 self.view.makeToast("좋아요 목록에서 제거됐어요!")
             }
+            
         } else {
             let newItem = LikeList()
             newItem.id = detailID
-            
-            // 이미지 파일 저장
-            if let userImage = userImage.image {
-                saveImageToDocument(image: userImage, filename: "\(detailID)_user")
+            newItem.userName = userName.text!
+            newItem.createdDate = createdDate.text!
+            newItem.width = sizeValueLabel.text!.hashValue//앞
+            newItem.height = sizeValueLabel.text!.hashValue//뒤
+            newItem.count = countValueLabel.text!.hashValue.formatted()
+            newItem.downloadValue = Int(downloadValueLabel.text!)!
+            //TODO: uiimage->data
+            if let userImageData = userImage.image?.pngData() {
+                newItem.userImage = userImageData
             }
-            if let smallImage = smallImage.image {
-                saveImageToDocument(image: smallImage, filename: "\(detailID)_small")
+            if let smallImageData = smallImage.image?.pngData() {
+                newItem.smallImage = smallImageData
             }
-            
-            newItem.userName = userName.text ?? ""
-            newItem.createdDate = createdDate.text ?? ""
-            
-            // 크기 값을 분리하여 Int로 변환
-            if let sizeText = sizeValueLabel.text {
-                let sizes = sizeText.split(separator: "x").map { $0.trimmingCharacters(in: .whitespaces) }
-                if sizes.count == 2 {
-                    newItem.width = Int(sizes[0]) ?? 0
-                    newItem.height = Int(sizes[1]) ?? 0
-                }
-            }
-            
-            newItem.count = Int(countValueLabel.text ?? "") ?? 0
-            newItem.downloadValue = Int(downloadValueLabel.text ?? "") ?? 0
             
             try! realm.write({
                 realm.add(newItem)
             })
             self.view.makeToast("좋아요 목록에 추가됐어요!")
         }
-        likeFuncButton.isSelected.toggle()
+        likeFuncButton.isSelected.toggle()//를 먼저하고!
     }
-
-
 }

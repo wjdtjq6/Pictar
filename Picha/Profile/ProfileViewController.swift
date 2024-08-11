@@ -10,7 +10,7 @@ import Then
 import SnapKit
 import RealmSwift
 
-class ProfileViewController: BaseViewController {
+final class ProfileViewController: BaseViewController {
     lazy var profileButton = UIButton().then {
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 50

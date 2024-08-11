@@ -11,7 +11,7 @@ import Then
 import Kingfisher
 import RealmSwift
 
-class TopicViewController: BaseViewController {
+final class TopicViewController: BaseViewController {
     let profileButton = UIButton().then {
         $0.setImage(UIImage(named: "profile_"+UserDefaults.standard.string(forKey: "profile")!), for: .normal)
         $0.backgroundColor = .greyColor
@@ -34,16 +34,11 @@ class TopicViewController: BaseViewController {
         return view
     }()
     @objc func profileButtonPressed() {
-        print(#function)
         let vc = ProfileViewController()
         vc.hidesBottomBarWhenPushed = true
-        UINavigationController(rootViewController: vc)
         navigationController?.pushViewController(vc, animated: true)
     }
-    
-//    let headerTitles = ["골든 아워":"golden-hour",
-//                        "비즈니스 및 업무":"business-work",
-//                        "건축 및 인테리어":"architecture-interior"]
+
     let headerTitles = ["골든 아워", "비즈니스 및 업무", "건축 및 인테리어"]
     var goldenList = [Photos]()
     var buisnessList = [Photos]()
@@ -56,19 +51,30 @@ class TopicViewController: BaseViewController {
         configureHierarchy()
         configureLayout()
         configureUI()
-        UnsplashAPI.shared.photos(api: .photos(topicID: "golden-hour"), model: [Photos].self) {[self] value in
-            goldenList = value!
-            tableView.reloadData()
-        }
-        UnsplashAPI.shared.photos(api: .photos(topicID: "business-work"), model: [Photos].self) { value in
-            self.buisnessList = value!
+        
+        fetchPhtos(topicID: "golden-hour") { photos in
+            self.goldenList = photos
             self.tableView.reloadData()
         }
-        UnsplashAPI.shared.photos(api: .photos(topicID: "architecture-interior"), model: [Photos].self) { value in
-            self.architectureList = value!
+        fetchPhtos(topicID: "business-work") { photos in
+            self.buisnessList = photos
             self.tableView.reloadData()
         }
+        fetchPhtos(topicID: "architecture-interior") { photos in
+            self.architectureList = photos
+            self.tableView.reloadData()
+        }
+        
         realmList = realm.objects(LikeList.self)
+    }
+    private func fetchPhtos(topicID: String, completion: @escaping ([Photos]) -> Void ) {
+        UnsplashAPI.shared.photos(api: .photos(topicID: topicID), model: [Photos].self) { photos in
+            guard let photos = photos else {
+                print("Error fechPhotos topicID: \(topicID)")
+                return
+            }
+            completion(photos)
+        }
     }
     override func configureHierarchy() {
         view.addSubview(titleLabel)
@@ -109,13 +115,13 @@ class TopicViewController: BaseViewController {
 }
 extension TopicViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        3
+        headerTitles.count
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         1
     }
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return headerTitles[section]
+        headerTitles[section]
     }
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         let header = view as! UITableViewHeaderFooterView
@@ -161,7 +167,7 @@ extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSou
                 group.leave()
                 return
             }
-            let newData = LikeList(id: list.id, date: Date(), userImage: data.user.profile_image.medium, smallImage: data.urls.small, userName: data.user.name, createdDate: data.created_at, width: data.width, height: data.height, count: list.views.total, downloadValue: list.downloads.total, isLike: self.realmList.first(where: { $0.id == imageID })?.isLike ?? false)
+            let newData = LikeList(id: list.id, date: Date(), userImage: data.user.profile_image.medium.data(using: .utf8, allowLossyConversion: false)!, smallImage: data.urls.small.data(using: .utf8, allowLossyConversion: true)!, userName: data.user.name, createdDate: data.created_at, width: data.width, height: data.height, count: list.views.total.formatted(), downloadValue: list.downloads.total, isLike: self.realmList.first(where: { $0.id == imageID })?.isLike ?? false)
             self.addDataToRealm(data: newData)
             group.leave()
         }
@@ -215,11 +221,8 @@ extension TopicViewController: UICollectionViewDelegate, UICollectionViewDataSou
     
     private func updateUI(vc: PictureDetailViewController, imageID: String) {
         if let data = realm.objects(LikeList.self).filter("id == %@", imageID).first {
-            let userImageUrl = data.userImage
-            //vc.userImage.kf.setImage(with: URL(string: userImageUrl))
             vc.userImage.image = loadImageToDocument(filename: data.id+"_user")
-            let smallImageUrl = data.smallImage
-            //vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
+            print(data.id)
             vc.smallImage.image = loadImageToDocument(filename: data.id)
             vc.userName.text = data.userName
             let dateFormatter = DateFormatter()

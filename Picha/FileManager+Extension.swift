@@ -40,21 +40,12 @@ extension BaseViewController {
         guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return nil }
         let fileURL = documentDirectory.appendingPathComponent("\(filename).jpg")
         //이 경로에 실제로 파일이 존재하는 지 확인
-        if FileManager.default.fileExists(atPath: fileURL.path) {
-            return UIImage(contentsOfFile: fileURL.path)
+        if let imageData = try? Data(contentsOf: fileURL) {
+            return UIImage(data: imageData)
         } else {
             return nil
         }
     }
-    func loadImageToDocumnetReverse(filename: String) -> UIImage? {
-        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {return nil}
-        let fileURL = documentDirectory.appendingPathComponent("\(filename).jpg")
-        //이 경로에 실제로 파일이 존재하는 지 확인
-        if FileManager.default.fileExists(atPath: fileURL.path) {
-            return UIImage(contentsOfFile: fileURL.path)
-        } else {
-            return nil
-        }    }
     func saveImageToDocument(image: UIImage, filename: String) {
         guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return}
         //이미지를 저장할 경로(파일명) 지정

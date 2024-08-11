@@ -221,7 +221,7 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
                 group.leave()
                 return
             }
-            let newData = LikeList(id: list.id, date: Date(), userImage: data.user.profile_image.medium, smallImage: data.urls.small, userName: data.user.name, createdDate: data.created_at, width: data.width, height: data.height, count: list.views.total, downloadValue: list.downloads.total, isLike: self.realmList.first(where: { $0.id == imageID })?.isLike ?? false)
+            let newData = LikeList(id: list.id, date: Date(), userImage: data.user.profile_image.medium.data(using: .utf8)!, smallImage: data.urls.small.data(using: .utf8)!, userName: data.user.name, createdDate: data.created_at, width: data.width, height: data.height, count: list.views.total.formatted(), downloadValue: list.downloads.total, isLike: self.realmList.first(where: { $0.id == imageID })?.isLike ?? false)
             self.addDataToRealm(data: newData)
             group.leave()
         }
@@ -275,11 +275,7 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
     
     private func updateUI(vc: PictureDetailViewController, imageID: String) {
         if let data = realm.objects(LikeList.self).filter("id == %@", imageID).first {
-            let userImageUrl = data.userImage
-            //vc.userImage.kf.setImage(with: URL(string: userImageUrl))
             vc.userImage.image = loadImageToDocument(filename: data.id+"_user")
-            let smallImageUrl = data.smallImage
-            //vc.smallImage.kf.setImage(with: URL(string: smallImageUrl))
             vc.smallImage.image = loadImageToDocument(filename: data.id)
             vc.userName.text = data.userName
             let dateFormatter = DateFormatter()
@@ -378,13 +374,13 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
             let newLikeData = LikeList(
                 id: imageID,
                 date: Date(),
-                userImage: index.user.profile_image.medium,
-                smallImage: index.urls.small,
+                userImage: index.user.profile_image.medium.data(using: .utf8)!,
+                smallImage: index.urls.small.data(using: .utf8)!,
                 userName: index.user.name,
                 createdDate: index.created_at,
                 width: index.width,
                 height: index.height,
-                count: 0, // 초기화 시점에는 count와 downloadValue를 0으로 설정
+                count: "", // 초기화 시점에는 count와 downloadValue를 0으로 설정
                 downloadValue: 0,
                 isLike: true // 새 항목을 추가할 때 `isLike`를 `true`로 설정
             )
@@ -397,7 +393,7 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
                 }
 
                 try! self.realm.write {
-                    newLikeData.count = stats.views.total
+                    newLikeData.count = stats.views.total.formatted()
                     newLikeData.downloadValue = stats.downloads.total
                     self.realm.add(newLikeData)
                     sender.isSelected = true
