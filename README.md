@@ -55,7 +55,7 @@
 - DispatchGroup을 통한 비동기 이미지 처리
 - 실시간 좋아요 상태 관리 및 UI 업데이트
 
-## 🔧 트러블 슈팅
+## 🔧 시행착오
 
 ### 1. 오프셋 기반 페이지네이션 데이터 관리
 #### 문제 상황
@@ -165,17 +165,17 @@ func removeImageFromDocument(filename: String) {
 
 ## 📝 회고
 
-### Keep (유지할 점)
+### 잘한 점
 - FileManager와 Realm을 연동한 하이브리드 저장소 설계
 - UICollectionViewDataSourcePrefetching을 활용한 효율적인 페이지네이션
 - 컬러 필터링을 위한 열거형 기반 타입 안전성 확보
 
-### Problem (개선할 점)
+### 아쉬운 점
 - 다중 필터 적용 시 검색 성능 최적화
 - 이미지 저장소 자동 정리 정책 수립
 - 좋아요 상태 변경 시 동시성 처리 개선
 
-### Try (시도할 점)
+### 시도할 점
 - 이미지 메타데이터 캐싱 전략 재설계
 - 컬러 기반 이미지 분류 알고리즘 개선
 - FileManager 저장소 관리 자동화
