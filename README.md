@@ -28,7 +28,7 @@
 - **Design Pattern**: Singleton, Observer Pattern, Repository Pattern
 
 ### 데이터베이스 & 네트워킹
-- **Local Storage**: Realm + FileManager
+- **Local Storage**: Realm
 - **Network**: Alamofire
 - **Image Caching**: Kingfisher
 
