@@ -4,7 +4,7 @@
 <br />
 
 ## 📱 프로젝트 소개
-> **개발 기간**: 2024.7.22 ~ 2024.7.31 (1주) <br/>
+> **개발 기간**: 2024.7.22 ~ 2024.7.28  
 > **개발 인원**: 1인 (기획/디자인/개발)
 
 <div align="center">
@@ -25,10 +25,10 @@
 
 ### 아키텍처 & 디자인 패턴
 - **Architecture**: MVC
-- **Design Pattern**: Singleton, Observer Pattern, Repository Pattern
+- **Design Pattern**: Singleton
 
 ### 데이터베이스 & 네트워킹
-- **Local Storage**: Realm
+- **Local Storage**: Realm + FileManager
 - **Network**: Alamofire
 - **Image Caching**: Kingfisher
 
@@ -38,24 +38,30 @@
 
 ## 📋 주요 기능
 
-### Unsplash API 기반 사진 검색 시스템
-- 최신순/관련순 정렬 기능 구현
-- 12가지 컬러 필터를 통한 검색 결과 필터링
-- 실시간 검색어 처리 및 결과 표시
+### 실시간 이미지 검색 시스템
+- 최신순/관련순 정렬 기능
+- 12가지 컬러 필터링 (흑백/컬러)
+- Unsplash API 기반 검색 결과 표시
 
-### 오프셋 기반 페이지네이션 구현
-- UICollectionViewDataSourcePrefetching 프로토콜 활용
-- 페이지 번호 기반 오프셋 페이지네이션 구현
-- 스크롤 위치 기반 자동 데이터 로딩
-- 정렬 옵션 변경 시 페이지 초기화 처리
+### 오프셋 기반 페이지네이션
+- 페이지 번호 기반 데이터 요청 관리
+- 스크롤 기반 다음 페이지 자동 로딩
 
 
-### 좋아요 기능과 이미지 관리
-- Realm과 FileManager를 활용한 데이터 영구 저장
-- DispatchGroup을 통한 비동기 이미지 처리
-- 실시간 좋아요 상태 관리 및 UI 업데이트
+### 좋아요 기능과 컬렉션 관리
+- Realm과 FileManager 연동 저장 시스템
+- 최신순/과거순 컬렉션 정렬
 
-## 🔧 시행착오
+### MBTI 기반 프로필 시스템
+- 16가지 MBTI 유형 선택 기능
+- 닉네임 유효성 검증 시스템
+
+### 사진 상세 정보 제공
+- 조회수, 다운로드 수 표시
+- 업로드 날짜, 이미지 크기 정보
+- 작가 프로필 정보 연동
+
+## 🔧 트러블 슈팅
 
 ### 1. 오프셋 기반 페이지네이션 데이터 관리
 #### 문제 상황
@@ -165,17 +171,15 @@ func removeImageFromDocument(filename: String) {
 
 ## 📝 회고
 
-### 잘한 점
+### Keep (유지할 점)
 - FileManager와 Realm을 연동한 하이브리드 저장소 설계
 - UICollectionViewDataSourcePrefetching을 활용한 효율적인 페이지네이션
-- 컬러 필터링을 위한 열거형 기반 타입 안전성 확보
 
-### 아쉬운 점
+### Problem (개선할 점)
 - 다중 필터 적용 시 검색 성능 최적화
-- 이미지 저장소 자동 정리 정책 수립
 - 좋아요 상태 변경 시 동시성 처리 개선
 
-### 시도할 점
+### Try (시도할 점)
 - 이미지 메타데이터 캐싱 전략 재설계
 - 컬러 기반 이미지 분류 알고리즘 개선
 - FileManager 저장소 관리 자동화
